@@ -1,3 +1,9 @@
+:root {
+  --clemsonPurple: #522D80;
+  --clemsonOrange: #F56600;
+
+}
+
 .App {
   text-align: center;
 }

@@ -1,0 +1,21 @@
+@import url("./../../App.css");
+
+
+.home-screen-row {
+    background-color: var(--clemsonPurple);
+    display: flex;
+    align-items: center;
+}
+
+.home-screen-title {
+    color: var(--clemsonOrange);
+    display: flexbox;
+}
+
+.home-screen-logo {
+    max-width: 10%;
+    max-height: 10%;
+    padding: 2% 2% 2% 2%;
+    display: flex;
+    justify-content: left;
+}
