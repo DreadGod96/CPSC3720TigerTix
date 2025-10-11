@@ -1,20 +1,48 @@
-const SQLITE3 = require('sqlite3').verbose(); //verbose for more detailed logging
+import sqlite3 from 'sqlite3';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
-let DATABASE;
+//Helpers, defining paths to the db files
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
+//define the absolute path to the database file
+const DATABASE_FILE = path.join(__dirname, '..', 'shared-db', 'databases.sqlite');
+//define the absolute path to the sqlite initialization script
+const INIT_SCRIPT = path.join(__dirname, '..', 'shared-db', 'init.sql');
 /**
  * Attempts to open existing database. If opening fails or database does not exist, returns false.
  * Otherwise, return true.
  * @returns {boolean} If the database was opened successfully or not.
  */
-async function openDatabase() {
-    DATABASE = new SQLITE3.Database('./backend/shared-db/database.sqlite', (error) => {
-    if(error) {
-        //TODO: add call here to run `init.sql` to make sqlite database
-        
-        return false
+export async function openDatabase() {
+    let initSql;
+    try {
+        initSql -= fs.readFileSync(INIT_SCRIPT, 'utf-8');
+    }
+    catch (error) {
+        console.error('DB SETUP ERROR: Could not read init.sql schema');
     }
 
-    console.log('Connected to the database.');
-});
+    //Connect to database/Create database
+    const db = new sqlite3.Database(DATABASE_FILE, (err) => {
+        if (err) {
+            console.error('DB SETUP ERROR: Failed to connect to/create the database');
+        }
+        console.log('DB file successfully opened/created');
+    });
+
+    return new Promise((resolve, reject) => {
+        //execute init.sql
+        db.exec(initSql, function (error) {
+            db.close();
+            if (error) {
+                console.log('DB SETUP ERROR: SQL script failed to execute.');
+                return reject(error);
+            }
+            console.log('Database table successfully created/verified');
+            resolve();
+        });
+    });
 }
