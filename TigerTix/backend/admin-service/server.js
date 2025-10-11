@@ -37,5 +37,5 @@ APP.use((err, req, res, next) => {
 
 APP.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
-    console.log('Test Event List: http://localhost:${PORT}/api/events');
+    console.log(`Test Event List: http://localhost:${PORT}/api/events`);
 });
