@@ -15,16 +15,7 @@ const DB = new sqlite3.Database(DATABASE, (err) => {
 //Returns an array of event objects
 exports.findAllEvents = () => {
     return new Promise((resolve, reject) => {
-        const sql = '
-        SELECT
-        event_id,
-            event_name,
-            event_date,
-            number_of_tickets_available,
-            price_of_a_ticket
-        FROM Events
-        ORDER BY event_id
-        ';
+        const sql = 'SELECT event_id, event_name, event_date, number_of_tickets_available, price_of_a_ticket FROM Events ORDER BY event_id';
 
         DB.all(sql, [], (err, rows) => {
             if (err) {
