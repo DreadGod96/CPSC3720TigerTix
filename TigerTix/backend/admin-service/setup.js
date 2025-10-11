@@ -7,8 +7,10 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+//define the absolute path to the database directory
+const SHARED_DB_DIR = path.join(__dirname, '..', 'shared-db');
 //define the absolute path to the database file
-const DATABASE_FILE = path.join(__dirname, '..', 'shared-db', 'databases.sqlite');
+const DATABASE_FILE = path.join(__dirname, '..', 'shared-db', 'database.sqlite');
 //define the absolute path to the sqlite initialization script
 const INIT_SCRIPT = path.join(__dirname, '..', 'shared-db', 'init.sql');
 /**
@@ -19,7 +21,7 @@ const INIT_SCRIPT = path.join(__dirname, '..', 'shared-db', 'init.sql');
 export async function openDatabase() {
     let initSql;
     try {
-        initSql -= fs.readFileSync(INIT_SCRIPT, 'utf-8');
+        initSql = fs.readFileSync(INIT_SCRIPT, 'utf-8');
     }
     catch (error) {
         console.error('DB SETUP ERROR: Could not read init.sql schema');
@@ -34,6 +36,11 @@ export async function openDatabase() {
     });
 
     return new Promise((resolve, reject) => {
+        //Database doesnt execute until init.sql is loaded
+        if (!initSql) {
+            db.closel
+            return reject(new Error('Init SQL was not loaded.'));
+        }
         //execute init.sql
         db.exec(initSql, function (error) {
             db.close();
