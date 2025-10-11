@@ -1,8 +1,9 @@
 import sqlite3 from "sqlite3";
 
+const DATABASE_PATH = './../shared-db/database.sqlite';
 const SQLITE3 = sqlite3.verbose();
 
-const db = new SQLITE3.Database('./../shared-db/database.sqlite', (err) => {
+const db = new SQLITE3.Database(DATABASE_PATH, (err) => {
     if (err) {
         console.error("Model Error: Failed to connect to the database.", err.message);
     } else {
@@ -37,6 +38,7 @@ function create(eventData) {
                 console.error("Error in Event.create:", err.message);
                 reject(new Error('Failed to create the event in the database.'));
             } else {
+                
                 // Resolve with the newly created event object
                 resolve({ event_id: this.lastID, ...eventData });
             }

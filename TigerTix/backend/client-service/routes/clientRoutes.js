@@ -1,6 +1,6 @@
+import express from 'express';
+import * as clientController from '../controllers/clientController.js';
 
-const express = require('express');
-const clientController = require('../controllers/clientController');
 const router = express.Router();
 
 //GET /api/events
@@ -11,4 +11,4 @@ router.get('/', clientController.listEvents);
 //Decrease ticket count
 router.post('/:id/purchase', clientController.purchaseTicket);
 
-module.exports = router;
+export default router;

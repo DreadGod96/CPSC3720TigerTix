@@ -1,9 +1,7 @@
-
-const express = require('express');
-const cors = require('cors');
-//import clientModel on startup
-require('./models/clientModel');
-const clientRoutes = require('./routes/clientRoutes');
+import express from 'express';
+import cors from 'cors';
+import clientRoutes from './routes/clientRoutes.js';
+import './models/clientModel.js';
 
 const app = express();
 //Declare client service port
