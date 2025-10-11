@@ -7,8 +7,7 @@ const DATABASE = '../shared-db/database.sqlite';
 function openDatabase() {
     try {
         //allow client service to open, read, and write from the db
-        //if database doesn't exist, client service will create it
-        const db = new sqlite3.Database(DATABASE, sqlite3.OPEN_READWRITE || sqlite3.OPEN_CREATE, (err) => {
+        const db = new sqlite3.Database(DATABASE, sqlite3.READONLY (err) => {
             if (err) {
                 console.log('Database connection error');
             }
