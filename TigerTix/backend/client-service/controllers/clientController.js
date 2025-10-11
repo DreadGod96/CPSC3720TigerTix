@@ -1,5 +1,4 @@
-const clientModel = require('../models/clientModel');
-
+import * as clientModel from '../models/clientModel.js';
 //Handler for GET /api/events
 exports.listEvents = async (req, res) => {
     try {
