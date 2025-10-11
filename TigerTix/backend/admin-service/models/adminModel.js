@@ -2,7 +2,7 @@ import sqlite3 from "sqlite3";
 
 const SQLITE3 = sqlite3.verbose();
 
-const db = new SQLITE3.Database('./backend/shared-db/database.sqlite', (err) => {
+const db = new SQLITE3.Database('./../shared-db/database.sqlite', (err) => {
     if (err) {
         console.error("Model Error: Failed to connect to the database.", err.message);
     } else {
@@ -10,10 +10,7 @@ const db = new SQLITE3.Database('./backend/shared-db/database.sqlite', (err) => 
     }
 });
 
-
-async function findAll(){
-    const db = await getDb();
-
+function findAll(){
     return new Promise((resolve, reject) => {
         const sql = "SELECT * FROM events";
         db.all(sql, [], (err, rows) => {
@@ -23,8 +20,7 @@ async function findAll(){
     });
 }
 
-async function create(eventData) {
-    const db = await getDb();
+function create(eventData) {
     return new Promise((resolve, reject) => {
         const {event_name, event_date, number_of_tickets_available, price_of_a_ticket} = eventData;
 
