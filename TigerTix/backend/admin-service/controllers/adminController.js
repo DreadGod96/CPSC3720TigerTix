@@ -1,46 +1,47 @@
-// /******************************
-//  * 
-//  * 
-//  *  IMPORTANT, BELOW IS JUST AN EXAMPLE, BASICALLY PSEUDO CODE
-//  * 
-//  *  CHANGE IT TO BE IN A FUNCTION CALL FOR PROPER USAGE
-//  * 
-//  */
+import Event from "../models/adminModel.js"
 
-
-
-//Define commands
-const db = new sqlite3.Database('./backend/shared-db/database.sqlite');
-const sql = 'INSERT INTO events (name, date, tickets) VALUES (?, ?, ?)';
-const params = [eventData.name, eventData.date, eventData.tickets];
-
-// The db.run method executes the query
-db.run(sql, params, function(err) {
-    if (err) {
-
-        // Handle error
-        return;
+export const getEvents = async (req, res) => {
+    try {
+        const events = await Event.findAll(req.body);
+        res.status(200).json({
+            success: true,
+            data: events,
+            count: events.length
+        });
     }
-    // The 'this.lastID' contains the ID of the new row.
-});
+    catch{
+        console.error("Error fetching events:", error)
 
-db.close();
-
-
-// // Example POST method
-async function addData() {
-    const DatabaseEndpoint = 'http://localhost:5000/api/events';
-    const request = await fetch(DatabaseEndpoint, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json' 
-        },
-        body: JSON.stringify({
-            "hi": "hi"
-        }),
-    });
-
-    const response = await request.json();
-    console.log(response);
+        res.status(500).json({
+            success: false,
+            message: 'Server error: Could not find events.'
+        });
+    }
 }
+
+export const createEvent = async (req, res) => {
+    try{
+        const event = await Event.create(req.body);
+        res.status(201).json({
+            succces: true,
+            data: event
+        });
+    }
+    catch{
+        console.error("Error creating event:", error);
+        if (error.name === 'ValidationError'){
+            return res.status(400).json({
+                success: false,
+                message: "Input data is invalid. Please make sure all necessary data is provided"
+            })
+        }
+
+        res.status(500).json({
+            success: false,
+            message: "Server error: Could not create the event"
+        })
+    }
+}
+
+
 

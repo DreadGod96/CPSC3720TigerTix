@@ -1,11 +1,12 @@
 import express from "express";
-
 const ROUTER = express.Router();
 
-import {
-    sendHelloWorld,
-} from "./../models/adminModel.js"
+import{
+    getEvents,
+    createEvent
+} from "../controllers/adminController.js";
 
-ROUTER.get("/", sendHelloWorld);
+ROUTER.get("/", getEvents);
+ROUTER.post("/", createEvent);
 
 export default ROUTER;
