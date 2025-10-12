@@ -52,8 +52,8 @@ export const purchaseTicket = async (req, res) => {
 
         res.status(200).json({
             message: 'Ticket purchase successful.',
-            event_id: eventId,
-            new_available_tickets: 1 
+            success: true,
+            event_id: eventId
         });
     }
     catch (error) {
@@ -63,11 +63,11 @@ export const purchaseTicket = async (req, res) => {
         switch (error.message) {
             //404 error
             case 'NOT_FOUND':
-                return res.status(404).json({ message: `Event with ID ${eventId} not found.` });
+                return res.status(404).json({ error: `Event with ID ${eventId} not found.` });
 
             //400 error
             case 'NO_TICKETS':
-                return res.status(400).json({ message: 'Purchase failed: No tickets available.' });
+                return res.status(400).json({ error: 'Purchase failed: No tickets available.' });
 
             //500 error
             case 'DB_CHECK_ERROR':
