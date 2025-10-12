@@ -1,6 +1,13 @@
 import Event from "../models/clientModel.js";
 
-//Handler for GET /api/events
+/**
+ * Handles request for retrieving all events from the database
+ * On success, responds with a 200 status and a JSON array of all events in the database
+ * On failure, responds with a 500 status and error message
+ * @route GET api/events
+ * @param {object} req Express request object
+ * @param {object} res Express response object, sends response back to client
+ */
 export const getEvents = async (req, res) => {
     try {
         const events = await Event.findAllEvents();
@@ -14,7 +21,13 @@ export const getEvents = async (req, res) => {
     }
 };
 
-//Handler for POST /api/events/:id/purchase
+/**
+ * @route POST /api/events/:id/purchase
+ * @param {object} req Express request object
+ * @param {object} req.param The requests parameters
+ * @param {string} req.param.id The ID of the event that the ticket is being bought for
+ * @param {object} res Express response object, sends response back to client
+ */
 export const purchaseTicket = async (req, res) => {
     const eventId = parseInt(req.params.id);
 

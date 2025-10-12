@@ -11,6 +11,20 @@ const db = new SQLITE3.Database(DATABASE_PATH, (err) => {
     }
 });
 
+class ValidationError extends Error {
+    constructor(message) {
+        super(message);
+        this.name = 'ValidationError';
+    }
+}
+
+/**
+ * Attempts to create a new event and add it to the database. If valid event data is passed, an event is
+ * created and added to the database. If it is not, an error is returned.
+ * @param {object} eventData The data for the event (name, date, number of tickets, price of tickets)
+ * @returns {Promise<object>} A promise that resolves with the newly created event object. On failure,
+ * rejects with an error.
+ */
 function create(eventData) {
     return new Promise((resolve, reject) => {
         const {event_name, event_date, number_of_tickets_available, price_of_a_ticket} = eventData;
