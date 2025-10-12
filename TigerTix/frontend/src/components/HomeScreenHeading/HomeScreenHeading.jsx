@@ -1,6 +1,6 @@
 import "./HomeScreenHeading.css"
 
-export default function HomeScreenHeading({title, logo}){
+export default function HomeScreenHeading({title, logo}) {
     return (
         <div className="home-screen-row">
             <img src={logo} alt="Clemson University Orange Tiger Paw" className="home-screen-logo"/>
