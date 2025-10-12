@@ -49,10 +49,9 @@ function create(eventData) {
     });
 }
 
-// Export an object that matches the structure your controller expects.
+// Export object for controller
 const Event = {
-    findAll,
-    create,
+    create
 };
 
 export default Event;

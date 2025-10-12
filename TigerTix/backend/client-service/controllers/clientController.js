@@ -1,8 +1,9 @@
-import * as clientModel from '../models/clientModel.js';
+import Event from "../models/clientModel";
+
 //Handler for GET /api/events
-exports.listEvents = async (req, res) => {
+export const getEvents = async (req, res) => {
     try {
-        const events = await clientModel.findAllEvents();
+        const events = await Event.findAllEvents();
         res.status(200).json(events);
     }
     catch (erro) {
@@ -14,7 +15,7 @@ exports.listEvents = async (req, res) => {
 };
 
 //Handler for POST /api/events/:id/purchase
-exports.purchaseTicket = async (req, res) => {
+export const purchaseTicket = async (req, res) => {
     const eventId = parseInt(req.params.id);
 
     //Validate event id input
@@ -25,7 +26,7 @@ exports.purchaseTicket = async (req, res) => {
     }
 
     try {
-        const newCount = await clientModel.purchaseTicket(eventId);
+        const newCount = await Event.purchaseTicket(eventId);
 
         res.status(200).json({
             message: 'Ticket purchase successful.',
@@ -40,10 +41,12 @@ exports.purchaseTicket = async (req, res) => {
         switch (error.message) {
             //404 error
             case 'NOT_FOUND':
-                return res.status(404).json({ message: 'Event with ID ${eventId} not found.' });
+                return res.status(404).json({ message: `Event with ID ${eventId} not found.` });
+
             //400 error
             case 'NO_TICKETS':
                 return res.status(400).json({ message: 'Purchase failed: No tickets available.' });
+
             //500 error
             case 'DB_CHECK_ERROR':
             case 'DB_UPDATE_ERROR':

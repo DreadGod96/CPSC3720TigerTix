@@ -111,3 +111,11 @@ export const purchaseTicket = async (eventId) => {
         }
     }
 };
+
+
+const Event = {
+    findAllEvents,
+    purchaseTicket
+};
+
+export default Event;
