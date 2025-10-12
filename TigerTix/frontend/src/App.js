@@ -42,7 +42,12 @@ function App() {
             }
 
             const result = await response.json();
-            alert(`Successfully purchased ticket for: ${eventName}!`);
+            if(result.success) {
+                alert(`Successfully purchased ticket for: ${eventName}!`);
+            } else {
+                alert(`Error: ${result.message}`);
+            }
+            
 
             // Refresh UI to reflect change
             fetchEvents();
