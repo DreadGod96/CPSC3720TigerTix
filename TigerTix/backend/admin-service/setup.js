@@ -22,7 +22,6 @@ export function openDatabase() {
         }
  
         if(fs.existsSync(DATABASE_FILE)){
-            console.log('Database file already exists.');
             return resolve();
         }
 
@@ -32,7 +31,6 @@ export function openDatabase() {
                 console.error('DB SETUP ERROR: Failed to connect to/create the database', err.message);
                 return reject(err);
             }
-            console.log('DB file successfully opened/created.');
  
             //execute init.sql
             db.exec(initSql, function (execErr) {
@@ -41,7 +39,6 @@ export function openDatabase() {
                     console.error('DB SETUP ERROR: SQL script failed to execute.', execErr.message);
                     return reject(execErr);
                 }
-                console.log('Database table successfully created/verified.');
                 resolve();
             });
         });

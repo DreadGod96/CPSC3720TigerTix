@@ -38,7 +38,6 @@ openDatabase()
 
     // If database is created / verified to exist, continue
     .then(() => {
-        console.log('Database is ready.');
         APP.listen(PORT, () => {
             console.log(`Server running on port ${PORT}`);
             console.log(`Test Event List: http://localhost:${PORT}/api/events`);
