@@ -1,0 +1,11 @@
+@import url("./../../App.css");
+
+.event-list {
+    list-style-type: none;
+    padding: 0;
+    margin: 2rem auto;
+    max-width: 700px;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}

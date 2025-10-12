@@ -1,0 +1,60 @@
+@import url("./../../App.css");
+
+.event-item {
+    background-color: #ffffff;
+    border-radius: 8px;
+    border-left: 6px solid var(--clemsonPurple);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 1.5rem;
+    text-align: left;
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.event-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.event-details {
+    flex-grow: 1;
+}
+
+.event-name {
+    margin: 0 0 0.25rem 0;
+    color: #333;
+    font-size: 1.5rem;
+}
+
+.event-date, .event-tickets {
+    margin: 0.25rem 0;
+    color: #555;
+}
+
+.event-tickets strong {
+    color: var(--clemsonOrange);
+    font-size: 1.1rem;
+}
+
+.buy-ticket-button {
+    background-color: var(--clemsonOrange);
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 12px 24px;
+    font-size: 1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.buy-ticket-button:hover {
+    background-color: #d85a00; 
+}
+
+.buy-ticket-button:focus-visible {
+  outline: 3px solid var(--focusOutline);
+  outline-offset: 2px;
+}

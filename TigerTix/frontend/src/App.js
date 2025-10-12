@@ -16,6 +16,8 @@ export const CLEMSON_LOGO = "/paw-orange.png";
 function App() {
     const [events, setEvents] = useState([]);
 
+    const [statusMessage, setStatusMessage] = useState('');
+
     const fetchEvents = () => {
         fetch('http://localhost:6001/api/events')
         .then((res) => res.json())
@@ -42,19 +44,22 @@ function App() {
             }
 
             const result = await response.json();
-            if(result.success) {
-                alert(`Successfully purchased ticket for: ${eventName}!`);
+            if(!result.error) {
+                const successMessage = `Successfully purchased ticket for: ${eventName}!`;
+                alert(successMessage);
+                setStatusMessage(successMessage);
             } else {
-                alert(`Error: ${result.message}`);
+                alert(`Error: ${result.error}`);
+                setStatusMessage(`Error: ${result.message}`);
             }
             
-
-            // Refresh UI to reflect change
             fetchEvents();
             
         } catch (error) {
             console.error('Purchase error:', error);
-            alert(`Error: ${error.message}`);
+            const errorMsg = `Error: ${error.message}`;
+            alert(errorMsg);
+            setStatusMessage(errorMsg);
         }
     };
 
@@ -64,6 +69,10 @@ function App() {
                 title={APP_TITLE}
                 logo={CLEMSON_LOGO}
             />
+            <div className="sr-only" aria-live="polite" role="status">
+                {statusMessage}
+            </div>
+            <h1>Current Available Events: </h1>
             <EventList
                 events={events}
                 buyTicket={buyTicket}
