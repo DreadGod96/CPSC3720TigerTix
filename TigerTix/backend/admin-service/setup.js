@@ -7,9 +7,10 @@ const DATABASE_FILE = path.join(DATABASE_DIR, 'database.sqlite');
 const INIT_SCRIPT = path.join(DATABASE_DIR, 'init.sql');
 
 /**
- * Attempts to open existing database. If opening fails or database does not exist, returns false.
- * Otherwise, return true.
- * @returns {boolean} If the database was opened successfully or not.
+ * Attempts to open an existing database or create a new one if it doesn't exist.
+ * Initializes the database schema if a new database is created.
+ * @returns {Promise<void>} A Promise that resolves if the database is successfully opened/created and initialized,
+ *                          or rejects if an error occurs during the process.
  */
 export function openDatabase() {
     return new Promise((resolve, reject) => {
