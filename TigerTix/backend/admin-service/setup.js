@@ -1,18 +1,11 @@
 import sqlite3 from 'sqlite3';
 import fs from 'fs';
 import path from 'path';
-import { fileURLToPath } from 'url';
 
-//Helpers, defining paths to the db files
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const DATABASE_DIR = path.join('..','shared-db');
+const DATABASE_FILE = path.join(DATABASE_DIR, 'database.sqlite');
+const INIT_SCRIPT = path.join(DATABASE_DIR, 'init.sql');
 
-//define the absolute path to the database directory
-const SHARED_DB_DIR = path.join(__dirname, '..', 'shared-db');
-//define the absolute path to the database file
-const DATABASE_FILE = path.join(__dirname, '..', 'shared-db', 'database.sqlite');
-//define the absolute path to the sqlite initialization script
-const INIT_SCRIPT = path.join(__dirname, '..', 'shared-db', 'init.sql');
 /**
  * Attempts to open existing database. If opening fails or database does not exist, returns false.
  * Otherwise, return true.
