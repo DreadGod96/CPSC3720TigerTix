@@ -1,10 +1,10 @@
 import express from "express";
-const ROUTER = express.Router();
+const router = express.Router();
 
 import{
     createEvent
 } from "../controllers/adminController.js";
 
-ROUTER.post("/", createEvent);
+router.post("/", createEvent);
 
-export default ROUTER;
+export default router;

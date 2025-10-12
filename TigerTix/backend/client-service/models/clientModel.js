@@ -1,13 +1,12 @@
 import sqlite3 from 'sqlite3';
 
 // Path to database
-const DATABASE_PATH = '../shared-db/database.sqlite';
-const SQLITE3 = sqlite3.verbose();
+const database_path = '../shared-db/database.sqlite';
+const sqlite_3 = sqlite3.verbose();
 
-// Create new 
-const db = new SQLITE3.Database(DATABASE_PATH, sqlite3.OPEN_READWRITE, (err) => {
-    if (err) {
-        console.error("Client Model Error: Failed to connect to the database.", err.message);
+const database = new sqlite_3.Database(database_path, sqlite3.OPEN_READWRITE, (error) => {
+    if (error) {
+        console.error("Client Model Error: Failed to connect to the database.", error.message);
     } else {
         console.log('Client Model connected to the SQLite database.');
     }
@@ -24,13 +23,13 @@ const db = new SQLITE3.Database(DATABASE_PATH, sqlite3.OPEN_READWRITE, (err) => 
  * an error
  */
 export const findAllEvents = async () => {
-    const sql = 'SELECT event_id, event_name, event_date, number_of_tickets_available, price_of_a_ticket FROM events ORDER BY event_id;';
+    const sql_commands = 'SELECT event_id, event_name, event_date, number_of_tickets_available, price_of_a_ticket FROM events ORDER BY event_id;';
     
     return new Promise((resolve, reject) => {
-        db.all(sql, [], (err, rows) => {
-            if (err) {
-                console.error('Error fetching events:', err.message);
-                return reject(err);
+        database.all(sql_commands, [], (error, rows) => {
+            if (error) {
+                console.error('Error fetching events:', error.message);
+                return reject(error);
             }
             resolve(rows);
         });
@@ -38,31 +37,33 @@ export const findAllEvents = async () => {
 };
  
 /**
- * Helper function to promisify db.run
- * @param {sqlite3.Database} db the SQlite database connection instance.
- * @param {string} sql SQL statement to be executed
- * @param {any[]} params optional array of parameters for the statements placeholders
+ * Helper function to promisify database.run
+ * @param {sqlite3.Database} database the SQlite database connection instance.
+ * @param {string} sql_commands SQL statement(s) to be executed. Multiple statements must be provided as single string 
+ *                              with semi-colon separated statements
+ * @param {any[]} parameters optional array of parameters for the statements placeholders
  * @returns {Promise{lastID: number, changes: number}} Promise that resolves the 'this' context in 
- * 'db.run' callbacks
+ * 'database.run' callbacks
  */
-const run = (db, sql, params = []) => new Promise((resolve, reject) => {
-    db.run(sql, params, function (err) {
-        if (err) reject(err);
+const run = (database, sql_commands, parameters = []) => new Promise((resolve, reject) => {
+    database.run(sql_commands, parameters, function (error) {
+        if (error) reject(error);
         else resolve(this);
     });
 });
  
 /**
- * Helper function to promisify db.get
- * @param {sqlite3.Database} db the SQlite database connection instance.
- * @param {string} sql SQL statement to be executed
- * @param {any[]} params optional array of parameters for the statements placeholders
+ * Helper function to promisify database.get
+ * @param {sqlite3.Database} database the SQlite database connection instance.
+ * @param {string} sql_commands SQL statement(s) to be executed. Multiple statements must be provided as single string 
+ *                              with semi-colon separated statements
+ * @param {any[]} parameters optional array of parameters for the statements placeholders
  * @returns {Promise<object|undefined>} A promise that resolves with either the first row found by the
  * query or 'undefined' if no row is found that matches the query. Rejects with an error
  */
-const get = (db, sql, params = []) => new Promise((resolve, reject) => {
-    db.get(sql, params, (err, row) => {
-        if (err) reject(err);
+const get = (database, sql_commands, parameters = []) => new Promise((resolve, reject) => {
+    database.get(sql_commands, parameters, (error, row) => {
+        if (error) reject(error);
         else resolve(row);
     });
 });
@@ -81,34 +82,33 @@ export const purchaseTicket = async (eventId) => {
     return new Promise((resolve, reject) => {
 
         // Execute SQL commands sequentially
-        db.serialize(async () => {
+        database.serialize(async () => {
             try {
-                await run(db, "BEGIN TRANSACTION;");
+                await run(database, "BEGIN TRANSACTION;");
                 
-                const row = await get(db, 'SELECT number_of_tickets_available FROM events WHERE event_id = ?', [eventId]);
+                const row = await get(database, 'SELECT number_of_tickets_available FROM events WHERE event_id = ?', [eventId]);
         
                 if (!row) {
-                    await run(db, "ROLLBACK;");
+                    await run(database, "ROLLBACK;");
                     return reject(new Error('NOT_FOUND'));
                 }
         
-                const currentTickets = row.number_of_tickets_available;
+                const current_tickets = row.number_of_tickets_available;
         
-                if (currentTickets <= 0) {
-                    await run(db, "ROLLBACK;");
+                if (current_tickets <= 0) {
+                    await run(database, "ROLLBACK;");
                     return reject(new Error('NO_TICKETS'));
                 }
                 
-                const updateSql = 'UPDATE events SET number_of_tickets_available = number_of_tickets_available - 1 WHERE event_id = ?';
-                await run(db, updateSql, [eventId]);
+                const update_tickets_sql_command = 'UPDATE events SET number_of_tickets_available = number_of_tickets_available - 1 WHERE event_id = ?';
+                await run(database, update_tickets_sql_command, [eventId]);
         
-                await run(db, "COMMIT;");
+                await run(database, "COMMIT;");
         
-                resolve(currentTickets - 1);
+                resolve(current_tickets - 1);
         
             } catch (error) {
                 console.error("Database transaction failed:", error.message);
-                //cawait run(db, "ROLLBACK;").catch(rbErr => console.error("Failed to rollback:", rbErr));
                 reject(new Error('DB_UPDATE_ERROR'));
             }
         });

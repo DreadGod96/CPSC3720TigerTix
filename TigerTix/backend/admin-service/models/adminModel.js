@@ -1,11 +1,11 @@
 import sqlite3 from "sqlite3";
 
-const DATABASE_PATH = './../shared-db/database.sqlite';
-const SQLITE3 = sqlite3.verbose();
+const database_path = './../shared-db/database.sqlite';
+const sqlite_3 = sqlite3.verbose();
 
-const db = new SQLITE3.Database(DATABASE_PATH, (err) => {
-    if (err) {
-        console.error("Admin Model Error: Failed to connect to the database.", err.message);
+const database = new sqlite_3.Database(database_path, (error) => {
+    if (error) {
+        console.error("Admin Model Error: Failed to connect to the database.", error.message);
     } else {
         console.log('Admin Model connected to the SQLite database.');
     }
@@ -22,46 +22,49 @@ function create(eventData) {
     return new Promise((resolve, reject) => {
         const {event_name, event_date, number_of_tickets_available, price_of_a_ticket} = eventData;
 
+        // Validate request has necessary data
         if (!event_name || !event_date || number_of_tickets_available == null || price_of_a_ticket == null) {
-            const err = new Error("Missing required fields: you must include an event name, date, number of tickets, and price of each ticket");
-            err.code = 'VALIDATION_ERROR';
-            return reject(err);
+            const error = new Error("Missing required fields: event name, date, number of tickets available, and price of each ticket");
+            error.code = 'VALIDATION_ERROR';
+            return reject(error);
         }
-        if (typeof number_of_tickets_available !== "number" || number_of_tickets_available < 0){
-            const err = new Error("The number of tickets must be 0 or greater");
-            err.code = 'VALIDATION_ERROR';
-            return reject(err);
-        }
-        if (typeof price_of_a_ticket !== "number" || price_of_a_ticket < 0){
-            const err = new Error("The price of a ticket must be 0 or greater");
-            err.code = 'VALIDATION_ERROR';
-            return reject(err);
+
+        // Validate that tickets are available for purchase
+        if (typeof number_of_tickets_available !== 'number' || number_of_tickets_available < 0){
+            const error = new Error("The number of tickets must be 0 or greater");
+            error.code = 'VALIDATION_ERROR';
+            return reject(error);
         }
     
-        const sql = 'INSERT INTO events (event_name, event_date, number_of_tickets_available, price_of_a_ticket) VALUES (?, ?, ?, ?)';
-        const params = [event_name, event_date, number_of_tickets_available, price_of_a_ticket];
+        const sql_commands = 'INSERT INTO events (event_name, event_date, number_of_tickets_available, price_of_a_ticket) VALUES (?, ?, ?, ?)';
+        const sql_parameters = [event_name, event_date, number_of_tickets_available, price_of_a_ticket];
 
-        db.serialize(() => {
-            db.run("BEGIN TRANSACTION;", (err) => {
-                if (err){
-                    return reject(err);
+        // Run sql_commands queries sequentially
+        database.serialize(() => {
+
+            // Begin transaction
+            database.run("BEGIN TRANSACTION;", (error) => {
+                if (error){
+                    return reject(error);
                 }
             });
 
-            db.run(sql, params, function (err) {
-                if (err) {
-                    db.run("ROLLBACK;");
-                    console.error("Error in Event.create:", err.message);
+            // Attempt to create new event
+            database.run(sql_commands, sql_parameters, function (error) {
+                if (error) {
+                    database.run("ROLLBACK;");
+                    console.error("Error in Event.create:", error.message);
                     return reject(new Error('Failed to create the event in the database.'));
                 }
+                
+            });
 
-                db.run("COMMIT;", (commitErr) =>{
-                    if (commitErr){
-                        db.run("ROLLBACK;");
-                        return reject(commitErr);
-                    }
-                    resolve({ event_id: this.lastID, ...eventData });
-                });
+            database.run("COMMIT;", (commitError) =>{
+                if (commitError){
+                    database.run("ROLLBACK;");
+                    return reject(commitError);
+                }
+                resolve({ event_id: this.lastID, ...eventData });
             });
 
         });

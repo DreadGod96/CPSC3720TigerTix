@@ -8,7 +8,7 @@ import EventList from './components/EventList/EventList';
 
 
 //Defines / constants
-const APP_TITLE = "TigerTix";
+const app_title = "TigerTix";
 export const CLEMSON_LOGO = "/paw-orange.png";
 
 
@@ -18,11 +18,12 @@ function App() {
 
     const [statusMessage, setStatusMessage] = useState('');
 
+    // Attempt to fetch events from client service
     const fetchEvents = () => {
         fetch('http://localhost:6001/api/events')
-        .then((res) => res.json())
+        .then((response) => response.json())
         .then((data) => setEvents(data))
-        .catch((err) => console.error(err));
+        .catch((error) => console.error(error));
     };
     
     useEffect(() => {
@@ -66,7 +67,7 @@ function App() {
     return (
         <div className="App">
             <HomeScreenHeading
-                title={APP_TITLE}
+                title={app_title}
                 logo={CLEMSON_LOGO}
             />
             <div className="sr-only" aria-live="polite" role="status">

@@ -4,8 +4,9 @@ import clientRoutes from './routes/clientRoutes.js';
 import './models/clientModel.js';
 
 const app = express();
+
 //Declare client service port
-const PORT = 6001;
+const port = 6001;
 
 //Backend API 
 app.use(cors());
@@ -15,8 +16,8 @@ app.use(express.json());
 app.use('/api/events', clientRoutes);
 
 //Start the server
-app.listen(PORT, () => {
-    console.log(`Client service running on http://localhost:${PORT}`);
-    console.log(`Test Event List: http://localhost:${PORT}/api/events`);
+app.listen(port, () => {
+    console.log(`Client service running on http://localhost:${port}`);
+    console.log(`Test Event List: http://localhost:${port}/api/events`);
 });
 

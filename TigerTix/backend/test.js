@@ -53,7 +53,7 @@ const testCreateEvents = async () => {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(generateRandomEvent()),
-        }).then(res => res.ok ? res.json() : Promise.reject(new Error(`Failed with status ${res.status}`)));
+        }).then(response => response.ok ? response.json() : Promise.reject(new Error(`Failed with status ${response.status}`)));
         promises.push(promise);
     }
     const results = await Promise.allSettled(promises);
@@ -68,7 +68,7 @@ const testGetAllEvents = async () => {
     const promises = [];
     for (let i = 0; i < GET_REQUESTS; i++) {
         const promise = fetch(CLIENT_SERVICE_URL)
-            .then(res => res.ok ? res.json() : Promise.reject(new Error(`Failed with status ${res.status}`)));
+            .then(response => response.ok ? response.json() : Promise.reject(new Error(`Failed with status ${response.status}`)));
         promises.push(promise);
     }
     const results = await Promise.allSettled(promises);
@@ -97,12 +97,12 @@ const testPurchaseTickets = async () => {
         const purchaseUrl = `${CLIENT_SERVICE_URL}/${randomEvent.event_id}/purchase`;
 
         const promise = fetch(purchaseUrl, { method: 'POST' })
-            .then(async res => {
-                if (!res.ok) {
-                    const errorBody = await res.json();
-                    return Promise.reject(new Error(errorBody.message || `Failed with status ${res.status}`));
+            .then(async response => {
+                if (!response.ok) {
+                    const errorBody = await response.json();
+                    return Promise.reject(new Error(errorBody.message || `Failed with status ${response.status}`));
                 }
-                return res.json();
+                return response.json();
             });
         promises.push(promise);
     }
@@ -122,4 +122,4 @@ const runTests = async () => {
     console.log('=============== LOAD TEST FINISHED ==============');
 };
 
-runTests().catch(err => console.error('A critical error occurred during testing:', err));
+runTests().catch(error => console.error('A critical error occurred during testing:', error));

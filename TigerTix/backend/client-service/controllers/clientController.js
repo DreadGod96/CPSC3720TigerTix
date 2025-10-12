@@ -6,18 +6,18 @@ import queueService from "../services/queueService.js";
  * On success, responds with a 200 status and a JSON array of all events in the database
  * On failure, responds with a 500 status and error message
  * @route GET api/events
- * @param {object} req Express request object
- * @param {object} res Express response object, sends response back to client
+ * @param {object} request Express request object
+ * @param {object} response Express response object, sends response back to client
  */
-export const getEvents = async (req, res) => {
+export const getEvents = async (request, response) => {
     try {
-        const createTask = () => Event.findAllEvents(req.body);
+        const createTask = () => Event.findAllEvents(request.body);
         const events = await queueService.addToQueue(createTask);
-        res.status(200).json(events);
+        response.status(200).json(events);
     }
     catch (error) {
         console.error('Error fetching events:', error);
-        res.status(500).json({
+        response.status(500).json({
             error: 'Failed to retrieve events.'
         });
     }
@@ -30,17 +30,17 @@ export const getEvents = async (req, res) => {
  * On failure, responds with the appropriate 400 or 500 level status and a unique error message for the
  * specific error
  * @route POST /api/events/:id/purchase
- * @param {object} req Express request object
- * @param {object} req.param The requests parameters
- * @param {string} req.param.id The ID of the event that the ticket is being bought for
- * @param {object} res Express response object, sends response back to client
+ * @param {object} request Express request object
+ * @param {object} request.param The requests parameters
+ * @param {string} request.param.id The ID of the event that the ticket is being bought for
+ * @param {object} response Express response object, sends response back to client
  */
-export const purchaseTicket = async (req, res) => {
-    const eventId = parseInt(req.params.id);
+export const purchaseTicket = async (request, response) => {
+    const eventId = parseInt(request.params.id);
 
     //Validate event id input
     if (isNaN(eventId) || eventId <= 0) {
-        return res.status(400).json({
+        return response.status(400).json({
             error: 'Invalid Event ID.'
         });
     }
@@ -48,9 +48,8 @@ export const purchaseTicket = async (req, res) => {
     try {
         const createTask = () => Event.purchaseTicket(eventId);
         const event = await queueService.addToQueue(createTask);
-        //const newTicketCount = event.number_of_available_tickets;
 
-        res.status(200).json({
+        response.status(200).json({
             message: 'Ticket purchase successful.',
             success: true,
             event_id: eventId
@@ -63,20 +62,21 @@ export const purchaseTicket = async (req, res) => {
         switch (error.message) {
             //404 error
             case 'NOT_FOUND':
-                return res.status(404).json({ error: `Event with ID ${eventId} not found.` });
+                return response.status(404).json({ error: `Event with ID ${eventId} not found.` });
 
             //400 error
             case 'NO_TICKETS':
-                return res.status(400).json({ error: 'Purchase failed: No tickets available.' });
+                return response.status(400).json({ error: 'Purchase failed: No tickets available.' });
 
             //500 error
             case 'DB_CHECK_ERROR':
             case 'DB_UPDATE_ERROR':
             case 'COMMIT_ERROR':
-                return res.status(500).json({ error: 'A database error occured during ticket purchase.' });
+                return response.status(500).json({ error: 'A database error occured during ticket purchase.' });
+
             //Any other 500 error
             default:
-                return res.status(500).json({ error: 'An unknown server error occurred.' });
+                return response.status(500).json({ error: 'An unknown server error occurred.' });
         }
     }
 };

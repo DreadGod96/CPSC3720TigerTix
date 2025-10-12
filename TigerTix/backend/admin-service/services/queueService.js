@@ -4,6 +4,11 @@ const taskQueue = [];
 // Lock to work on one task at a time
 let isProcessing = false;
 
+/**
+ * Processes the tasks in the queue.
+ * This function is called internally to manage the execution of tasks.
+ * It ensures that only one task is processed at a time.
+ */
 const processQueue = async () => {
 
     if (isProcessing || taskQueue.length === 0) {
@@ -30,6 +35,7 @@ const processQueue = async () => {
         processQueue();
     }
 };
+
 
 /**
  * Adds a task to the queue.

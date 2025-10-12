@@ -4,32 +4,32 @@ import cors from "cors"
 import { openDatabase } from "./setup.js";
 
 // Define constants
-const APP = express();
-const PORT = 5001;
+const app = express();
+const port = 5001;
 
 // Setup middleware
-APP.use(cors());
-APP.use(express.json());
-APP.use(express.urlencoded({ extended: true }));
+app.use(cors());
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 // Setup routes
-APP.use("/api/events", adminRoutes);
+app.use("/api/events", adminRoutes);
 
 // Setup error handling for routes that do not exist
-APP.use((req, res, next) => {
+app.use((request, response, next) => {
     const error = new Error('Route Not Found');
     error.statusCode = 404;
     next(error);
 });
 
 // Setup error handling for requests
-APP.use((err, req, res, next) => {
-    console.error(err.stack);
+app.use((error, request, response, next) => {
+    console.error(error.stack);
 
-    const statusCode = err.statusCode || 500;
-    res.status(statusCode).json({
+    const statusCode = error.statusCode || 500;
+    response.status(statusCode).json({
         status: 'error',
-        message: err.message || 'An unexpected error occurred.'
+        message: error.message || 'An unexpected error occurred.'
     });
 });
 
@@ -38,14 +38,14 @@ openDatabase()
 
     // If database is created / verified to exist, continue
     .then(() => {
-        APP.listen(PORT, () => {
-            console.log(`Server running on port ${PORT}`);
-            console.log(`Test Event List: http://localhost:${PORT}/api/events`);
+        app.listen(port, () => {
+            console.log(`Server running on port ${port}`);
+            console.log(`Test Event List: http://localhost:${port}/api/events`);
         });
     })
 
     // Database failed to create, exit
-    .catch((err) => {
-        console.error('Failed to initialize database:', err);
+    .catch((error) => {
+        console.error('Failed to initialize database:', error);
         process.exit(1);
     });
