@@ -1,31 +1,25 @@
 import sqlite3 from 'sqlite3';
 
-//Path to the shared db
+// Path to database
 const DATABASE_PATH = '../shared-db/database.sqlite';
+const SQLITE3 = sqlite3.verbose();
 
-//Connect to the shared db
-function openDatabase() {
-    return new Promise((resolve, reject) => {
-        const mode = sqlite3.OPEN_READWRITE;
-        const db = new sqlite3.Database(DATABASE_PATH, mode, (err) => {
-            if (err) {
-                console.error('Database failed to open:', err.message);
-                return reject(err);
-            }
-            resolve(db);
-        });
-    });
-}
+// Create new 
+const db = new SQLITE3.Database(DATABASE_PATH, sqlite3.OPEN_READWRITE, (err) => {
+    if (err) {
+        console.error("Client Model Error: Failed to connect to the database.", err.message);
+    } else {
+        console.log('Client Model connected to the SQLite database.');
+    }
+});
 
 //Fetch all events from database
 //Returns an array of event objects
 export const findAllEvents = async () => {
-    const db = await openDatabase();
     const sql = 'SELECT event_id, event_name, event_date, number_of_tickets_available, price_of_a_ticket FROM events ORDER BY event_id;';
     
     return new Promise((resolve, reject) => {
         db.all(sql, [], (err, rows) => {
-            db.close(); 
             if (err) {
                 console.error('Error fetching events:', err.message);
                 return reject(err);
@@ -53,63 +47,41 @@ const get = (db, sql, params = []) => new Promise((resolve, reject) => {
  
  
 export const purchaseTicket = async (eventId) => {
+    return new Promise((resolve, reject) => {
 
-    const db = await openDatabase(); 
-
-    try {
-
-        // Start transaction
-        await run(db, "BEGIN TRANSACTION;");
+        // Execute SQL commands sequentially
+        db.serialize(async () => {
+            try {
+                await run(db, "BEGIN TRANSACTION;");
+                
+                const row = await get(db, 'SELECT number_of_tickets_available FROM events WHERE event_id = ?', [eventId]);
         
-        const row = await get(db, 'SELECT number_of_tickets_available FROM events WHERE event_id = ?', [eventId]);
- 
-        if (!row) {
-            await run(db, "ROLLBACK;");
-            throw new Error('NOT_FOUND');
-        }
- 
-        const currentTickets = row.number_of_tickets_available;
- 
-        if (currentTickets <= 0) {
-            await run(db, "ROLLBACK;");
-            throw new Error('NO_TICKETS');
-        }
+                if (!row) {
+                    await run(db, "ROLLBACK;");
+                    return reject(new Error('NOT_FOUND'));
+                }
         
-        const updateSql = 'UPDATE events SET number_of_tickets_available = number_of_tickets_available - 1 WHERE event_id = ?';
-        await run(db, updateSql, [eventId]);
- 
-        // End transaction
-        await run(db, "COMMIT;");
- 
-        return currentTickets - 1;
- 
-    } catch (error) {
-
-        // If any errors occur, try to rollback
-        try {
-            await run(db, "ROLLBACK;");
-        } catch (error) {
-            console.error("Failed to rollback:", error);
-        }
- 
-        // Throw original error back to controller
-        if (error.message === 'NOT_FOUND' || error.message === 'NO_TICKETS') {
-            throw error;
-        }
-
-        // Throw general database error to controller
-        console.error("Database transaction failed:", error.message);
-        throw new Error('DB_UPDATE_ERROR');
-
-    } finally {
+                const currentTickets = row.number_of_tickets_available;
         
-        // Close database as good practice
-        if (db) {
-            db.close((err) => {
-                if (err) console.error("Error closing the database:", err.message);
-            });
-        }
-    }
+                if (currentTickets <= 0) {
+                    await run(db, "ROLLBACK;");
+                    return reject(new Error('NO_TICKETS'));
+                }
+                
+                const updateSql = 'UPDATE events SET number_of_tickets_available = number_of_tickets_available - 1 WHERE event_id = ?';
+                await run(db, updateSql, [eventId]);
+        
+                await run(db, "COMMIT;");
+        
+                resolve(currentTickets - 1);
+        
+            } catch (error) {
+                console.error("Database transaction failed:", error.message);
+                //cawait run(db, "ROLLBACK;").catch(rbErr => console.error("Failed to rollback:", rbErr));
+                reject(new Error('DB_UPDATE_ERROR'));
+            }
+        });
+    });
 };
 
 

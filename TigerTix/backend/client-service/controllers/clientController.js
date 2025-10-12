@@ -1,12 +1,14 @@
 import Event from "../models/clientModel.js";
+import queueService from "../services/queueService.js";
 
 //Handler for GET /api/events
 export const getEvents = async (req, res) => {
     try {
-        const events = await Event.findAllEvents();
+        const createTask = () => Event.findAllEvents(req.body);
+        const events = await queueService.addToQueue(createTask);
         res.status(200).json(events);
     }
-    catch (erro) {
+    catch (error) {
         console.error('Error fetching events:', error);
         res.status(500).json({
             error: 'Failed to retrieve events.'
@@ -26,16 +28,18 @@ export const purchaseTicket = async (req, res) => {
     }
 
     try {
-        const newCount = await Event.purchaseTicket(eventId);
+        const createTask = () => Event.purchaseTicket(eventId);
+        const event = await queueService.addToQueue(createTask);
+        //const newTicketCount = event.number_of_available_tickets;
 
         res.status(200).json({
             message: 'Ticket purchase successful.',
             event_id: eventId,
-            new_available_tickets: newCount
+            new_available_tickets: 1 
         });
     }
     catch (error) {
-        console.error('Purchase error for event ${eventId}:', error.message);
+        console.error(`Purchase error for event ${eventId}:`, error.message);
 
         //Handle model errors
         switch (error.message) {

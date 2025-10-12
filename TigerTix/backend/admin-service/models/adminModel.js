@@ -5,9 +5,9 @@ const SQLITE3 = sqlite3.verbose();
 
 const db = new SQLITE3.Database(DATABASE_PATH, (err) => {
     if (err) {
-        console.error("Model Error: Failed to connect to the database.", err.message);
+        console.error("Admin Model Error: Failed to connect to the database.", err.message);
     } else {
-        console.log('Model connected to the SQLite database.');
+        console.log('Admin Model connected to the SQLite database.');
     }
 });
 
@@ -32,8 +32,7 @@ function create(eventData) {
                 if (err) {
                     db.run("ROLLBACK;");
                     console.error("Error in Event.create:", err.message);
-                    reject(new Error('Failed to create the event in the database.'));
-                
+                    return reject(new Error('Failed to create the event in the database.'));
                 }
 
                 db.run("COMMIT;", (commitErr) =>{
@@ -42,7 +41,7 @@ function create(eventData) {
                         return reject(commitErr);
                     }
                     resolve({ event_id: this.lastID, ...eventData });
-                })
+                });
             });
 
         });
