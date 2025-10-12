@@ -1,4 +1,5 @@
 import Event from "../models/adminModel.js"
+import queueService from "../services/queueService.js";
 
 /**
  * Handles creation of a new event based on the body of request recieved
@@ -14,7 +15,9 @@ import Event from "../models/adminModel.js"
  */
 export const createEvent = async (req, res) => {
     try {
-        const event = await Event.create(req.body);
+        const createTask = () => Event.create(req.body);
+        const event = await queueService.addToQueue(createTask);
+
         res.status(201).json({
             succces: true,
             data: event
