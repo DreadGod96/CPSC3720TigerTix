@@ -11,38 +11,44 @@ const INIT_SCRIPT = path.join(DATABASE_DIR, 'init.sql');
  * Otherwise, return true.
  * @returns {boolean} If the database was opened successfully or not.
  */
-export async function openDatabase() {
-    let initSql;
-    try {
-        initSql = fs.readFileSync(INIT_SCRIPT, 'utf-8');
-    }
-    catch (error) {
-        console.error('DB SETUP ERROR: Could not read init.sql schema');
-    }
-
-    //Connect to database/Create database
-    const db = new sqlite3.Database(DATABASE_FILE, (err) => {
-        if (err) {
-            console.error('DB SETUP ERROR: Failed to connect to/create the database');
-        }
-        console.log('DB file successfully opened/created');
-    });
-
+export function openDatabase() {
     return new Promise((resolve, reject) => {
-        //Database doesnt execute until init.sql is loaded
-        if (!initSql) {
-            db.closel
-            return reject(new Error('Init SQL was not loaded.'));
+        let initSql;
+        try {
+            initSql = fs.readFileSync(INIT_SCRIPT, 'utf-8');
+        } catch (error) {
+            console.error('DB SETUP ERROR: Could not read init.sql schema');
+            return reject(error);
         }
-        //execute init.sql
-        db.exec(initSql, function (error) {
-            db.close();
-            if (error) {
-                console.log('DB SETUP ERROR: SQL script failed to execute.');
-                return reject(error);
+ 
+        if(fs.existsSync(DATABASE_FILE)){
+            console.log('Database file already exists.');
+            return resolve();
+        }
+
+        //Connect to database/Create database
+        const db = new sqlite3.Database(DATABASE_FILE, (err) => {
+            if (err) {
+                console.error('DB SETUP ERROR: Failed to connect to/create the database', err.message);
+                return reject(err);
             }
-            console.log('Database table successfully created/verified');
-            resolve();
+            console.log('DB file successfully opened/created.');
+ 
+            //execute init.sql
+            db.exec(initSql, function (execErr) {
+                db.close();
+                if (execErr) {
+                    console.error('DB SETUP ERROR: SQL script failed to execute.', execErr.message);
+                    return reject(execErr);
+                }
+                console.log('Database table successfully created/verified.');
+                resolve();
+            });
         });
     });
 }
+
+openDatabase()
+    .catch((error) => {
+        console.error('Database creation failed: ', error);
+    });
