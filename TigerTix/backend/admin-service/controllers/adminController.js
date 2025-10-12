@@ -8,8 +8,7 @@ export const getEvents = async (req, res) => {
             data: events,
             count: events.length
         });
-    }
-    catch{
+    } catch (error) {
         console.error("Error fetching events:", error)
 
         res.status(500).json({
@@ -20,14 +19,21 @@ export const getEvents = async (req, res) => {
 }
 
 export const createEvent = async (req, res) => {
-    try{
-        const event = await Event.create(req.body);
+    const body = {
+        event_id: 1,
+        event_name: 'hello',
+        event_date: '01/01/2023',
+        number_of_tickets_available: 100,
+        price_of_a_ticket: 100.00,
+    }
+
+    try {
+        const event = await Event.create(body);
         res.status(201).json({
             succces: true,
             data: event
         });
-    }
-    catch{
+    } catch (error) {
         console.error("Error creating event:", error);
         if (error.name === 'ValidationError'){
             return res.status(400).json({
