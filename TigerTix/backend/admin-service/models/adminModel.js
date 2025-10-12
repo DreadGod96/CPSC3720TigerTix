@@ -11,13 +11,6 @@ const db = new SQLITE3.Database(DATABASE_PATH, (err) => {
     }
 });
 
-class ValidationError extends Error {
-    constructor(message) {
-        super(message);
-        this.name = 'ValidationError';
-    }
-}
-
 /**
  * Attempts to create a new event and add it to the database. If valid event data is passed, an event is
  * created and added to the database. If it is not, an error is returned.
@@ -30,8 +23,21 @@ function create(eventData) {
         const {event_name, event_date, number_of_tickets_available, price_of_a_ticket} = eventData;
 
         if (!event_name || !event_date || number_of_tickets_available == null || price_of_a_ticket == null) {
-            return reject(new Error("Missing required fields."));
+            const err = new Error("Missing required fields: you must include an event name, date, number of tickets, and price of each ticket");
+            err.code = 'VALIDATION_ERROR';
+            return reject(err);
         }
+        if (typeof number_of_tickets_available !== "number" || number_of_tickets_available < 0){
+            const err = new Error("The number of tickets must be 0 or greater");
+            err.code = 'VALIDATION_ERROR';
+            return reject(err);
+        }
+        if (typeof price_of_a_ticket !== "number" || price_of_a_ticket < 0){
+            const err = new Error("The price of a ticket must be 0 or greater");
+            err.code = 'VALIDATION_ERROR';
+            return reject(err);
+        }
+    
         const sql = 'INSERT INTO events (event_name, event_date, number_of_tickets_available, price_of_a_ticket) VALUES (?, ?, ?, ?)';
         const params = [event_name, event_date, number_of_tickets_available, price_of_a_ticket];
 

@@ -24,10 +24,11 @@ export const createEvent = async (req, res) => {
         });
     } catch (error) {
         console.error("Error creating event:", error);
-        if (error.name === 'ValidationError'){
+
+        if (error.code === 'VALIDATION_ERROR'){
             return res.status(400).json({
                 success: false,
-                message: "Input data is invalid. Please make sure all necessary data is provided"
+                message: error.message
             })
         }
 
