@@ -1,16 +1,13 @@
 import EventItem from "./EventItem";
 
-export default function EventList({events}) {
-    const buyTicket = (eventName) => {
-        alert(`Ticket purchased for: ${eventName}`);
-    };
+export default function EventList({events, buyTicket}) {
 
     return (
         <ul>
             {
                 events.map((event) => (
                     <EventItem
-                        event={event} 
+                        event={event}
                         buyTicket={buyTicket}
                     />
                 ))
