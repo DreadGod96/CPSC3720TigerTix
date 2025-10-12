@@ -23,9 +23,9 @@ function findAll(){
 
 function create(eventData) {
     return new Promise((resolve, reject) => {
-        const {event_id, event_name, event_date, number_of_tickets_available, price_of_a_ticket} = eventData;
+        const {event_name, event_date, number_of_tickets_available, price_of_a_ticket} = eventData;
 
-        if (!event_id || !event_name || !event_date || number_of_tickets_available == null || price_of_a_ticket == null) {
+        if (!event_name || !event_date || number_of_tickets_available == null || price_of_a_ticket == null) {
             return reject(new Error("Missing required fields."));
         }
 
@@ -43,6 +43,7 @@ function create(eventData) {
                 resolve({ event_id: this.lastID, ...eventData });
             }
         });
+
     });
 }
 
