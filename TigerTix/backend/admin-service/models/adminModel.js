@@ -11,16 +11,6 @@ const db = new SQLITE3.Database(DATABASE_PATH, (err) => {
     }
 });
 
-function findAll(){
-    return new Promise((resolve, reject) => {
-        const sql = "SELECT * FROM events";
-        db.all(sql, [], (err, rows) => {
-            if (err) return reject(err);
-            resolve(rows);
-        });
-    });
-}
-
 function create(eventData) {
     return new Promise((resolve, reject) => {
         const {event_name, event_date, number_of_tickets_available, price_of_a_ticket} = eventData;
