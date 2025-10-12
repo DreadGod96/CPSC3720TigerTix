@@ -16,7 +16,7 @@ app.use('/api/events', clientRoutes);
 
 //Start the server
 app.listen(PORT, () => {
-    console.log('Client service running on http://localhost:${PORT}');
-    console.log('Test Event List: http://localhost:${PORT}/api/events');
+    console.log(`Client service running on http://localhost:${PORT}`);
+    console.log(`Test Event List: http://localhost:${PORT}/api/events`);
 });
 
