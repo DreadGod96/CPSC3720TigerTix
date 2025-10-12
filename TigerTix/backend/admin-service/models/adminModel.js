@@ -23,20 +23,20 @@ function findAll(){
 
 function create(eventData) {
     return new Promise((resolve, reject) => {
-        const {event_name, event_date, number_of_tickets_available, price_of_a_ticket} = eventData;
+        const {event_id, event_name, event_date, number_of_tickets_available, price_of_a_ticket} = eventData;
 
-        if (!event_name || !event_date || number_of_tickets_available == null || price_of_a_ticket == null) {
+        if (!event_id || !event_name || !event_date || number_of_tickets_available == null || price_of_a_ticket == null) {
             return reject(new Error("Missing required fields."));
         }
 
         const sql = 'INSERT INTO events (event_name, event_date, number_of_tickets_available, price_of_a_ticket) VALUES (?, ?, ?, ?)';
         const params = [event_name, event_date, number_of_tickets_available, price_of_a_ticket];
 
-        // The `function` keyword is used here to get access to `this.lastID`.
         db.run(sql, params, function (err) {
             if (err) {
                 console.error("Error in Event.create:", err.message);
                 reject(new Error('Failed to create the event in the database.'));
+                
             } else {
                 
                 // Resolve with the newly created event object
