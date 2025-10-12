@@ -6,7 +6,7 @@ const DATABASE_PATH = '../shared-db/database.sqlite';
 //Connect to the shared db
 function openDatabase() {
     return new Promise((resolve, reject) => {
-        const mode = sqlite3.OPEN_READONLY;
+        const mode = sqlite3.OPEN_READWRITE;
         const db = new sqlite3.Database(DATABASE_PATH, mode, (err) => {
             if (err) {
                 console.error('Database failed to open:', err.message);
