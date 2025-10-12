@@ -1,100 +1,113 @@
 import sqlite3 from 'sqlite3';
 
 //Path to the shared db
-const DATABASE = '../shared-db/database.sqlite';
+const DATABASE_PATH = '../shared-db/database.sqlite';
 
 //Connect to the shared db
 function openDatabase() {
-    try {
-        //allow client service to open, read, and write from the db
-        const db = new sqlite3.Database(DATABASE, sqlite3.READONLY (err) => {
+    return new Promise((resolve, reject) => {
+        const mode = sqlite3.OPEN_READONLY;
+        const db = new sqlite3.Database(DATABASE_PATH, mode, (err) => {
             if (err) {
-                console.log('Database connection error');
+                console.error('Database failed to open:', err.message);
+                return reject(err);
             }
+            resolve(db);
         });
-        return db;
-    }
-    catch (error) {
-        console.log('Could not open the database file');
-        throw error;
-    }
+    });
 }
 
 //Fetch all events from database
 //Returns an array of event objects
-exports.findAllEvents = () => {
+export const findAllEvents = async () => {
+    const db = await openDatabase();
+    const sql = 'SELECT event_id, event_name, event_date, number_of_tickets_available, price_of_a_ticket FROM events ORDER BY event_id;';
+    
     return new Promise((resolve, reject) => {
-        //Open the database
-        const db = openDatabase();
-        const sql = 'SELECT event_id, event_name, event_date, number_of_tickets_available, price_of_a_ticket FROM Events ORDER BY event_id';
-
-        DB.all(sql, [], (err, rows) => {
-            //Close when complete
-            db.close()
+        db.all(sql, [], (err, rows) => {
+            db.close(); 
             if (err) {
+                console.error('Error fetching events:', err.message);
                 return reject(err);
             }
             resolve(rows);
         });
     });
 };
+ 
+// Helper to promisify db.run
+const run = (db, sql, params = []) => new Promise((resolve, reject) => {
+    db.run(sql, params, function (err) {
+        if (err) reject(err);
+        else resolve(this);
+    });
+});
+ 
+// Helper to promisify db.get
+const get = (db, sql, params = []) => new Promise((resolve, reject) => {
+    db.get(sql, params, (err, row) => {
+        if (err) reject(err);
+        else resolve(row);
+    });
+});
+ 
+ 
+export const purchaseTicket = async (eventId) => {
 
-//Reduce and manage ticket count for event IDs with transactions
-exports.purchaseTicket = (eventId) => {
-    return new Promise((resolve, reject) => {
-        //Open db
-        const db = openDatabase();
+    const db = await openDatabase(); 
 
-        db.serialize(() => {
-            //start transaction
-            db.run("BEGIN TRANSACTION;");
+    try {
 
-            //check ticket count
-            db.get('SELECT number_of_tickets_availavle FROM events WHERE event_id = ?', [eventId], (err, row) => {
-                if (err) {
-                    db.run("ROLLBACK;");
-                    db.close();
-                    return reject(new Error('DB_CHECK_ERROR'));
-                }
+        // Start transaction
+        await run(db, "BEGIN TRANSACTION;");
+        
+        const row = await get(db, 'SELECT number_of_tickets_available FROM events WHERE event_id = ?', [eventId]);
+ 
+        if (!row) {
+            await run(db, "ROLLBACK;");
+            throw new Error('NOT_FOUND');
+        }
+ 
+        const currentTickets = row.number_of_tickets_available;
+ 
+        if (currentTickets <= 0) {
+            await run(db, "ROLLBACK;");
+            throw new Error('NO_TICKETS');
+        }
+        
+        const updateSql = 'UPDATE events SET number_of_tickets_available = number_of_tickets_available - 1 WHERE event_id = ?';
+        await run(db, updateSql, [eventId]);
+ 
+        // End transaction
+        await run(db, "COMMIT;");
+ 
+        return currentTickets - 1;
+ 
+    } catch (error) {
 
-                if (!row) {
-                    db.run("ROLLBACK;");
-                    db.close();
-                    return reject(new Error('NOT_FOUND'));
-                }
+        // If any errors occur, try to rollback
+        try {
+            await run(db, "ROLLBACK;");
+        } catch (error) {
+            console.error("Failed to rollback:", error);
+        }
+ 
+        // Throw original error back to controller
+        if (error.message === 'NOT_FOUND' || error.message === 'NO_TICKETS') {
+            throw error;
+        }
 
-                const currentTickets = row.number_of_tickets_available;
+        // Throw general database error to controller
+        console.error("Database transaction failed:", error.message);
+        throw new Error('DB_UPDATE_ERROR');
 
-                //Prevent overselling
-                if (currentTickets <= 0) {
-                    db.run("ROLLBACK;");
-                    db.close();
-                    return reject(new Error('NO_TICKETS'));
-                }
-
-                //Decrease ticket count by 1
-                const updateSql = 'UPDATE events SET number_of_tickets_available = number_of_ticketS_available - 1 WHERE event_id = ?';
-
-                db.run(updateSql, [eventId], function (updateErr) {
-                    if (updateErr) {
-                        db.run("ROLLBACK;");
-                        db.close();
-                        return reject(new Error('DB_UPDATE_ERROR'));
-                    }
-
-                    //commit the transaction
-                    db.run("COMMIT;", (commitErr) => {
-                        db.close();
-                        if (commitErr) {
-                            db.run("ROLLBACK;");
-                            return reject(new Error('COMMIT_ERROR'));
-                        }
-
-                        //resolve with new ticket count
-                        resolve(currentTickets - 1);
-                    });
-                });
+    } finally {
+        
+        // Close database as good practice
+        if (db) {
+            db.close((err) => {
+                if (err) console.error("Error closing the database:", err.message);
             });
-        });
-    })
+        }
+    }
 };
