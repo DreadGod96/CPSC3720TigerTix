@@ -2,9 +2,9 @@ import Event from "../models/adminModel.js"
 import queueService from "../services/queueService.js";
 
 /**
- * Handles creation of a new event based on the body of request recieved
+ * Handles creation of a new event based on the body of request received
  * On success, sends a 201 status and new event data
- * On validation failure, sends a 400 status and a message explaing the validation error
+ * On validation failure, sends a 400 status and a message explaining the validation error
  * @route POST /api/events
  * @param {object} req Express request object
  * @param {string} req.body.event_name Name of the event
@@ -19,7 +19,7 @@ export const createEvent = async (req, res) => {
         const event = await queueService.addToQueue(createTask);
 
         res.status(201).json({
-            succces: true,
+            success: true,
             data: event
         });
     } catch (error) {

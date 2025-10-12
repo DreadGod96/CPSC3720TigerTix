@@ -13,8 +13,6 @@ const db = new SQLITE3.Database(DATABASE_PATH, sqlite3.OPEN_READWRITE, (err) => 
     }
 });
 
-//Fetch all events from database
-//Returns an array of event objects
 /**
  * Fetches all the events from the database
  * @returns {Promise{Array<{
@@ -70,13 +68,13 @@ const get = (db, sql, params = []) => new Promise((resolve, reject) => {
 });
  
 /**
- * Simulates the purchase of a single ticket, and deincrements the number of tickets for an event in the 
+ * Simulates the purchase of a single ticket, and decrements the number of tickets for an event in the 
  * database by 1
  * @param {number} eventId The id of the event that someone is purchasing a ticket for
  * @returns {Promise<number>} Promise that resolves with the updated number of tickets for an event
  * @throws {Error} throws an error and a specific message based on what caused the error:
  * - 'NOT_FOUND': If no event exists with the id of eventId in the database
- * - 'NO_TICKETS': If the event that is requested has 0 tickets avaliable
+ * - 'NO_TICKETS': If the event that is requested has 0 tickets available
  * - 'DB_UPDATE_ERROR': All other generic database failures that can occur
  */
 export const purchaseTicket = async (eventId) => {

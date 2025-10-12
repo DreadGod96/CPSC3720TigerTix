@@ -24,6 +24,11 @@ export const getEvents = async (req, res) => {
 };
 
 /**
+ * Handles request of 'purchasing' a single ticket for an event. Validates with eventId before running
+ * the purchaseTicket function.
+ * On success, responds with 200 status code
+ * On failure, responds with the appropriate 400 or 500 level status and a unique error message for the
+ * specific error
  * @route POST /api/events/:id/purchase
  * @param {object} req Express request object
  * @param {object} req.param The requests parameters
