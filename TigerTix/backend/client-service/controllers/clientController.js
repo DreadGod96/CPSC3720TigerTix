@@ -1,4 +1,4 @@
-import Event from "../models/clientModel";
+import Event from "../models/clientModel.js";
 
 //Handler for GET /api/events
 export const getEvents = async (req, res) => {
