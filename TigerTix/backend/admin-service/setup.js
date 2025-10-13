@@ -32,19 +32,17 @@ export function openDatabase() {
                 console.error('DB SETUP ERROR: Failed to connect to/create the database', error.message);
                 return reject(error);
             }
+            
+            //execute init.sql
+            database.exec(initSql, function (executionError) {
+                database.close();
+                if (executionError) {
+                    console.error('DB SETUP ERROR: SQL script failed to execute.', executionError.message);
+                    return reject(executionError);
+                }
+                resolve();
+            });
         });
-
-        //execute init.sql
-        database.exec(initSql, function (executionError) {
-            database.close();
-            if (executionError) {
-                console.error('DB SETUP ERROR: SQL script failed to execute.', executionError.message);
-                return reject(executionError);
-            }
-            resolve();
-        });
-
-        
     });
 }
 

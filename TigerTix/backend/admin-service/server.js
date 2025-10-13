@@ -16,18 +16,18 @@ app.use(express.urlencoded({ extended: true }));
 app.use("/api/events", adminRoutes);
 
 // Setup error handling for routes that do not exist
-app.use((request, response, next) => {
+app.use((request, res, next) => {
     const error = new Error('Route Not Found');
     error.statusCode = 404;
     next(error);
 });
 
 // Setup error handling for requests
-app.use((error, request, response, next) => {
+app.use((error, request, res, next) => {
     console.error(error.stack);
 
     const statusCode = error.statusCode || 500;
-    response.status(statusCode).json({
+    res.status(statusCode).json({
         status: 'error',
         message: error.message || 'An unexpected error occurred.'
     });
