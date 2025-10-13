@@ -72,7 +72,7 @@ export const purchaseTicket = async (request, response) => {
             case 'DB_CHECK_ERROR':
             case 'DB_UPDATE_ERROR':
             case 'COMMIT_ERROR':
-                return response.status(500).json({ error: 'A database error occured during ticket purchase.' });
+                return response.status(500).json({ error: 'A database error occurred during ticket purchase.' });
 
             //Any other 500 error
             default:
