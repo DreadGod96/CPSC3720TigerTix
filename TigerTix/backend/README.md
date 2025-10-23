@@ -3,11 +3,14 @@
 - `https://www.w3schools.com/nodejs/nodejs_rest_api.asp`
 - `https://coderslegacy.com/javascript-sqlite3-tutorial-for-beginners-node-js/`
 - `https://www.geeksforgeeks.org/node-js/express-js/`
+- https://nodejs.org/en/learn/manipulating-files/reading-files-with-nodejs
 
 # Helpful Resources for Sprint 2
 - Task 1
     - https://medium.com/google-cloud/generating-request-body-for-apis-using-gemini-43977961ca2a
-    - https://github.com/JS-dev-101/google-gemini-cookbook
+    - https://github.com/googleapis/js-genai
+    - https://cookbook.openai.com/examples/how_to_use_guardrails
+    - https://googleapis.github.io/js-genai/release_docs/index.html
 - Task 2
     - https://developer.mozilla.org/en-US/docs/Web/API/Web_Speech_API/Using_the_Web_Speech_API
     - https://www.w3schools.in/javascript/text-to-speech-api
