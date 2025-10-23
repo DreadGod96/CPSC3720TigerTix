@@ -12,7 +12,7 @@ async function authenticateWithGoogle() {
     // necessary to authenticate to use api key
     // choose a method on the docs and experiments
     // good luck :)
-    
+
 }
 
 function cleanInput(userInput) {
@@ -46,11 +46,18 @@ export const queryChatbot = async (userInput) => {
 
     //TODO: If promise is rejected, send response that request is inappropriate
     const cleanedInput = cleanInput(userInput);
-    const prompt = await fs.readFile('./prompt.txt', 'utf-8', (error, data) => {
-        if (error) {
-            console.error(error);
-        }
-        return data;
+    
+    const prompt = await new Promise((resolve, reject) => {
+        fs.readFile('./prompt.txt', 'utf-8', (error, data) => {
+            if (error) {
+                console.error(error);
+                reject(error);
+                return;
+            }
+            resolve(data);
+            return;
+        });
+        
     });
 
     console.log(prompt);
