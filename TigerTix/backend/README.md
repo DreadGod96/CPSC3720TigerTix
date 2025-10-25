@@ -29,6 +29,6 @@
 ```txt
 GEMINI_API_KEY=...
 ```
-- Replace ...s with the api key
+- Replace ...'s with the api key
 
 
