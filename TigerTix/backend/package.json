@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "make-db": "sqlite3 backend/shared-db/database.sqlite | backend/shared-db/init.sql"
+    "make-db": "sqlite3 shared-db/database.sqlite < shared-db/init.sql"
   },
   "keywords": [],
   "author": "",
