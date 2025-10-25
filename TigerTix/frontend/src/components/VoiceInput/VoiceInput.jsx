@@ -54,10 +54,46 @@ const VoiceInput = ({ onSpeechResult }) => {
         }
     };
 
-
+    //Setup logic, after mic is added to screen
     useEffect(() => {
+        //Ensure browser compatibility
+        if (!recognition) { return; }
 
-    })
+        recognition.onStart = () => setIsListening(true);
+        recognition.onEnd = () => setIsListening(false);
+        recognition.onError = (event) => setError('Speech recognition error: ${event.error}');
+        //After speaking, text is transcribed and passed back to app.js
+        recognition.onResult = (event) => {
+            const currentTranscript = event.results[0][0].transcript;
+            setTranscript(currentTranscript);
+            onSpeechResult(currentTranscript);
+        };
+
+        //Cleanup after effect use
+        return () => {
+            recognition.onStart = null;
+            recognition.onEnd = null;
+            recognition.onError = null;
+            recognition.onResult = null;
+        };
+    },
+        [onSpeechResult]);
+
+    return (
+        <div className="voice-input-container">
+            <button
+                className="micButton"
+                onClick={{ handleMicClick }}
+                aria-label={isListening ? "Stop listening" : "Start voice command"}
+            >
+                <FAMicrophone color={isListening ? 'red' : 'black'} />
+            </button>
+
+            <p className="transcript-display">{transcript}</p>
+
+            {error && <p className="error-message" style={{ color: 'red' }}>{error}</p>}
+        </div>
+    );
 };
 
 export default VoiceInput;
