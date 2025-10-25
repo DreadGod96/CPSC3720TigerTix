@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import { GoogleGenAI } from '@google/genai';
 import fs from 'node:fs';
 import { parse } from 'node:path';
@@ -6,14 +7,6 @@ const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 const ai = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
 const model = 'gemini-2.0-flash-001';
 
-
-async function authenticateWithGoogle() {
-    //HINT: https://docs.cloud.google.com/docs/authentication/
-    // necessary to authenticate to use api key
-    // choose a method on the docs and experiments
-    // good luck :)
-
-}
 /**
  * Cleans and validates user input, removing nonalphanumeric characters
  * @param {*} userInput the string that is entered by the user
@@ -40,7 +33,7 @@ function cleanInput(userInput) {
         }
 
         // return string
-        resolve(cleaned);
+        resolve(cleanedStr);
     });
 }
 
