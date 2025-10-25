@@ -1,10 +1,9 @@
 import 'dotenv/config';
 import { GoogleGenAI } from '@google/genai';
-import fs from 'node:fs';
-import { parse } from 'node:path';
+import fs from 'node:fs/promises';
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
-const ai = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
+const ai = new GoogleGenAI({ GEMINI_API_KEY });
 const model = 'gemini-2.0-flash-001';
 
 /**
@@ -21,7 +20,7 @@ function cleanInput(userInput) {
             return reject(new Error('Input must be a string.'));
         }
         //empty string:
-        if (typeof userInput === '') {
+        if (userInput.trim() === '') {
             return reject(new Error('No input was entered'));
         }
 
@@ -37,62 +36,62 @@ function cleanInput(userInput) {
     });
 }
 
+/**
+ * Parses the text response from the LLM into a JSON object
+ * @param {string} modelResponse the text string from the AI
+ * @returns {object} a JSON object
+ */
 function parseModelResponse(modelResponse) {
-    // possible: send another ai request to determine if ai response is relevant / accurate
-    // turn the ai response into json, singling out event and number of tickets to buy
-    // HINT: you can define output structure in prompt.txt...
+    try {
+        //Remove markdown wrapper
+        const jsonString = modelResponse.replace(/```json\n|```/g, '');
+        const parsedJson = JSON.parse(jsonString);
 
-    return { event: "Jazz Night", tickets: 2 }
+        //Validate data types and structure, if valid, return
+        if (parsedJson.event && typeof parsedJson.tickets === 'number') {
+            return parsedJson;
+        }
+        else {
+            console.error("Parsed response is missing a data field.");
+            return null;
+        }
+    }
+    catch (error) {
+        console.error("Failed to parse the LLM response as JSON: ", modelResponse);
+        return null;
+    }
 }
 
 
 export const queryChatbot = async (userInput) => {
-    // this function is missing some features
-    // HINT: wrap the function in a promise...
+    //Debug #1 500 server error:
+    console.log("queryChatbot started");
+    try {
+        const cleanedInput = await cleanInput(userInput || "hi");
+        //#1
+        console.log("1.Input Cleaned");
+        console.log("2. Reading prompt.txt");
+        const systemPrompt = await fs.readFile('./prompt.txt', 'utf-8');
+        //#1
+        console.log("3. Successful read of prompt.txt");
+        const genAIModel = ai.getGenerativeModel({ model: model });
+        //#3
+        console.log("4. Sending request to Gemini API");
+        const result = await genAIModel.generateContent([
+            systemPrompt,
+            cleanedInput
+        ]);
 
-    userInput = userInput ? userInput : "hi";
-    // take user string
-    // clean input 
-    // pass to api request
-    // wait for api response
-    // parse output
-    // return json  
+        const responseText = result.response.text();
+        console.log("5. Received API response");
 
-    //TODO: If promise is rejected, send response that request is inappropriate
-    const cleanedInput = cleanInput(userInput);
-
-    const prompt = await new Promise((resolve, reject) => {
-        fs.readFile('./prompt.txt', 'utf-8', (error, data) => {
-            if (error) {
-                console.error(error);
-                reject(error);
-                return;
-            }
-            resolve(data);
-            return;
-        });
-
-    });
-
-    console.log(prompt);
-
-
-    const modelResponse = await ai.models.generateContent({
-        model: model,
-        contents: cleanedInput,
-        //TODO: figure out how to separate the prompt (system prompt) and the user request (prompt)
-        //HINT: https://googleapis.github.io/js-genai/release_docs/index.html documentation
-
-    }).catch((e) => {
-        console.error('error name: ', e.name);
-        console.error('error message: ', e.message);
-        console.error('error status: ', e.status);
-        //HINT: promise...
-    })
-
-    return parseModelResponse(modelResponse);
+        return parseModelResponse(responseText);
+    }
+    catch (error) {
+        console.error("Error in queryChatbot Function:", error.message);
+        throw new Error("Failed to process the chatbot request.");
+    }
 };
-
 
 const Event = {
     queryChatbot
