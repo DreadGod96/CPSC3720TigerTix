@@ -29,9 +29,31 @@ const playBeep = () => {
 
 const VoiceInput = ({ onSpeechResult }) => {
 
-    const handleMicClick = () => {
+    //Set inital states of listening, text, and error messaging
+    const [isListening, setIsListening] = useState(false);
+    const [transcript, setTranscript] = useState('');
+    const [error, setError] = useState('');
 
+    const handleMicClick = () => {
+        //Redundant verification for browser support on click
+        if (!SpeechRecognition) {
+            setError("The browser does not support this operation.")
+            return;
+        }
+
+        //On-click, if recognition is listening, end listening
+        if (isListening) {
+            recognition.stop();
+        }
+        //Start listening: beep, reset text translation, reset error messaging
+        else {
+            playBeep();
+            setTranscript('');
+            setError('');
+            recognition.start();
+        }
     };
+
 
     useEffect(() => {
 
