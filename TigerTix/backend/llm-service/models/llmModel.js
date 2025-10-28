@@ -4,7 +4,7 @@ import fs from 'node:fs/promises';
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 const ai = new GoogleGenAI({ GEMINI_API_KEY });
-const model = 'gemini-2.0-flash-001';
+const gemini_model = 'gemini-2.0-flash-001';
 
 /**
  * Cleans and validates user input, removing nonalphanumeric characters
@@ -64,28 +64,28 @@ function parseModelResponse(modelResponse) {
 
 
 export const queryChatbot = async (userInput) => {
-    //Debug #1 500 server error:
     console.log("queryChatbot started");
+
     try {
         const cleanedInput = await cleanInput(userInput || "hi");
-        //#1
         console.log("1.Input Cleaned");
         console.log("2. Reading prompt.txt");
         const systemPrompt = await fs.readFile('./prompt.txt', 'utf-8');
-        //#1
-        console.log("3. Successful read of prompt.txt");
-        const genAIModel = ai.getGenerativeModel({ model: model });
-        //#3
         console.log("4. Sending request to Gemini API");
-        const result = await genAIModel.generateContent([
-            systemPrompt,
-            cleanedInput
-        ]);
+        
+        const result = await ai.models.generateContent({
+            model: gemini_model,    
+            contents: cleanedInput,
+            config: {
+                systemInstruction: systemPrompt,
+                candidateCount: 1,
+            }
+        });
 
-        const responseText = result.response.text();
+        console.log(result);
         console.log("5. Received API response");
 
-        return parseModelResponse(responseText);
+        return parseModelResponse(result);
     }
     catch (error) {
         console.error("Error in queryChatbot Function:", error.message);
