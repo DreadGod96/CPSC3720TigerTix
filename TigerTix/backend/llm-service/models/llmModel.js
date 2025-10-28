@@ -46,7 +46,6 @@ function parseModelResponse(modelResponse) {
         //Remove markdown wrapper
         const jsonString = modelResponse.replace(/```json\n|```/g, '');
         const parsedJson = JSON.parse(jsonString);
-
         //Validate data types and structure, if valid, return
         if (parsedJson.event && typeof parsedJson.tickets === 'number') {
             return parsedJson;
@@ -57,7 +56,7 @@ function parseModelResponse(modelResponse) {
         }
     }
     catch (error) {
-        console.error("Failed to parse the LLM response as JSON: ", modelResponse);
+        console.error("Failed to parse the LLM response as JSON: ");
         return null;
     }
 }
@@ -72,7 +71,7 @@ export const queryChatbot = async (userInput) => {
         console.log("2. Reading prompt.txt");
         const systemPrompt = await fs.readFile('./prompt.txt', 'utf-8');
         console.log("4. Sending request to Gemini API");
-        
+
         const result = await ai.models.generateContent({
             model: gemini_model,    
             contents: cleanedInput,
@@ -82,10 +81,11 @@ export const queryChatbot = async (userInput) => {
             }
         });
 
-        console.log(result);
+        const modelResponse = result.candidates.at(0).content.parts;
+        console.log(modelResponse);
         console.log("5. Received API response");
 
-        return parseModelResponse(result);
+        return parseModelResponse(modelResponse);
     }
     catch (error) {
         console.error("Error in queryChatbot Function:", error.message);
