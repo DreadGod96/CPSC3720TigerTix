@@ -6,6 +6,7 @@ import './App.css';
 import HomeScreenHeading from './components/HomeScreenHeading/HomeScreenHeading';
 import EventList from './components/EventList/EventList';
 import VoiceInput from './components/VoiceInput/VoiceInput';
+import ChatBox from './components/ChatBox/ChatBox';
 
 
 //Defines / constants
@@ -18,6 +19,11 @@ function App() {
     const [events, setEvents] = useState([]);
 
     const [statusMessage, setStatusMessage] = useState('');
+
+    const [chatMessages, setChatMessages] = useState([
+        { sender: 'bot', text: 'Hi! How can I help you find tickets today?' }
+    ]);
+    const [isChatLoading, setIsChatLoading] = useState(false);
 
     // Attempt to fetch events from client service
     const fetchEvents = () => {
@@ -83,6 +89,10 @@ function App() {
                 {statusMessage}
             </div>
             <VoiceInput onSpeechResult={handleVoiceCommand} />
+            <ChatBox 
+                messages={chatMessages}
+                isLoading={isChatLoading}
+            />
             <h1>Current Available Events: </h1>
             <EventList
                 events={events}
