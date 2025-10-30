@@ -1,6 +1,6 @@
 import "./VoiceInput.css";
 import React, { useState, useEffect } from 'react';
-import { FAMicrophone } from 'react-icons/fa';
+import { FaMicrophone } from 'react-icons/fa';
 
 //Ensure browser compatibility
 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition; let recognition;
@@ -86,7 +86,7 @@ const VoiceInput = ({ onSpeechResult }) => {
                 onClick={handleMicClick}
                 aria-label={isListening ? "Stop listening" : "Start voice command"}
             >
-                <FAMicrophone color={isListening ? 'red' : 'black'} />
+                <FaMicrophone color={isListening ? 'red' : 'black'} />
             </button>
 
             <p className="transcript-display">{transcript}</p>
