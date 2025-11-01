@@ -256,25 +256,27 @@ export async function manageConversation(user_input, conversation_history = []) 
             // If no tool is called, return the model's text response
             try {
                 const final_response = response.text();
-            } catch {
-                throw new Error('INVALID_INPUT_CHARACTERS');
+                const updated_chat_history = await chat.getHistory();
+                return { 
+                    response: final_response, 
+                    history: updated_chat_history,
+                    booking_details: null,
+                };
+            } catch (e) {
+                
+                console.error("Could not get text from model response:", e);
+                throw new Error('MODEL_RESPONSE_BLOCKED');
             }
-            
-            
-            const updated_chat_history = await chat.getHistory();
-            return { 
-                response: final_response, 
-                history: updated_chat_history,
-                booking_details: null,
-            };
         }
 
     } catch (error) {
-        console.error("Error in manageConversation:", error);
-        return { 
-            response: "I'm sorry, but I encountered an error. Please try again later.", 
-            history: conversation_history 
-        };
+        // Re-throw specific input errors so the controller can handle them
+        if (error.message.startsWith('INVALID_INPUT')) {
+            throw error;
+        }
+        // For other errors, log them and throw a generic server error
+        console.error("Error in manageConversation:", error.message);
+        throw new Error('LLM_SERVICE_ERROR');
     }
 }
 
