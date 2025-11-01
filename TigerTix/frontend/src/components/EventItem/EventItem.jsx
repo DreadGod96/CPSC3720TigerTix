@@ -2,7 +2,7 @@ import "./EventItem.css";
 
 export default function EventItem({event, buyTicket}) {
 
-    const eventDate = new Date(event.event_date).toLocaleDateString('en-US', {
+    const eventDate = new Date(event.event_date + 'T00:00:00').toLocaleDateString('en-US', {
         weekday: 'long',
         year: 'numeric',
         month: 'long',
