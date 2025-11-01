@@ -17,10 +17,34 @@ export const getChatbotResponse = async (request, response) => {
             booking_details: model_response.booking_details ? model_response.booking_details : null,
         })
     } catch (error) {
-        
-        console.error(error);
-        response.status(500).json({
-            error: "Chatbot request failed."
-        });
+        let statusCode = 500;
+        let errorMessage = "An unexpected error occurred with the chatbot service.";
+
+        switch (error.message) {
+            case 'INVALID_INPUT_TYPE':
+            case 'INVALID_INPUT_NONE':
+            case 'INVALID_INPUT_TOO_LONG':
+                statusCode = 400; 
+                errorMessage = "Your input was invalid. Please provide a valid text message.";
+                break;
+            
+            case 'INVALID_INPUT_CODE':
+                statusCode = 400; 
+                errorMessage = "Your input appears to contain code or special characters, which is not allowed.";
+                break;
+
+            case 'MODEL_RESPONSE_BLOCKED':
+                statusCode = 503; 
+                errorMessage = "I'm sorry, but I can't provide a response to that. It may have violated our safety policies. Please try rephrasing your message.";
+                break;
+
+            case 'LLM_SERVICE_ERROR':
+            default:
+                statusCode = 500; 
+                errorMessage = "The chatbot service is currently experiencing issues. Please try again later.";
+                break;
+        }
+        console.error(`Chatbot Error: ${error.message}`);
+        response.status(statusCode).json({ error: errorMessage });
     }
 }
