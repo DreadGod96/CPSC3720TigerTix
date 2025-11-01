@@ -1,51 +1,88 @@
-import React, { useState, useEffect, useRef } from 'react';
-import "./ChatBox.css";
-import { FaPaperPlane } from 'react-icons/fa';
+import { useState, useEffect, useRef } from 'react';
+import './ChatBox.css';
+import { FaRobot, FaUser, FaPaperPlane } from 'react-icons/fa';
 
-export default function ChatBox({ messages, onSendMessage, isLoading }) {
-    const [userInput, setUserInput] = useState("");
-    const messageListRef = useRef(null);
+const ChatBox = ({ messages, isLoading, onSendMessage }) => {
+    const [isOpen, setIsOpen] = useState(false);
+    const [inputValue, setInputValue] = useState('');
+    const messagesEndRef = useRef(null);
 
-    useEffect(() => {
-        if (messageListRef.current){
-            messageListRef.current.scrollTop = messageListRef.current.scrollHeight;
-        }
-    }, [messages]);
+    const scrollToBottom = () => {
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    };
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        if (userInput.trim()) {
-            onSendMessage(userInput);
-            setUserInput("");
+    useEffect(scrollToBottom, [messages]);
+
+    const handleSend = () => {
+        if (inputValue.trim()) {
+            onSendMessage(inputValue);
+            setInputValue('');
         }
     };
 
+    const handleKeyPress = (e) => {
+        if (e.key === 'Enter') {
+            handleSend();
+        }
+    };
+
+    if (!isOpen) {
+        return (
+            <button
+                className="chatbox-fab"
+                onClick={() => setIsOpen(true)}
+                aria-label="Open TigerTix Chatbot"
+                title="Open TigerTix Chatbot"
+            >
+                <FaRobot />
+            </button>
+        );
+    }
+
     return (
-    <div className="chat-container">
-            <div className="message-list" ref={messageListRef}>
+        <div className="chatbox-container">
+            <div className="chatbox-header">
+                <h3>TigerTix Assistant</h3>
+                <button onClick={() => setIsOpen(false)} aria-label="Close Chatbox">&times;</button>
+            </div>
+            <div className="chatbox-messages">
                 {messages.map((msg, index) => (
-                    <div key={index} className={`message ${msg.sender}`}>
-                        {msg.text}
+                    <div
+                        key={index}
+                        className={`message ${msg.sender}`}
+                        aria-label={`${msg.sender === 'bot' ? 'Chatbot' : 'User'} message: ${msg.text}`}
+                    >
+                        <div className="message-icon">
+                            {msg.sender === 'bot' ? <FaRobot /> : <FaUser />}
+                        </div>
+                        <div className="message-text">{msg.text}</div>
                     </div>
                 ))}
                 {isLoading && (
                     <div className="message bot">
-                        ...
+                        <div className="message-icon"><FaRobot /></div>
+                        <div className="message-text typing-indicator">
+                            <span></span><span></span><span></span>
+                        </div>
                     </div>
                 )}
+                <div ref={messagesEndRef} />
             </div>
-            <form className="chat-form" onSubmit={handleSubmit}>
+            <div className="chatbox-input">
                 <input
                     type="text"
-                    value={userInput}
-                    onChange={(e) => setUserInput(e.target.value)}
-                    placeholder="Type your message..."
-                    aria-label="Message input box"
+                    value={inputValue}
+                    onChange={(e) => setInputValue(e.target.value)}
+                    onKeyDown={handleKeyPress}
+                    placeholder="Type a message..."
+                    aria-label="Chat input"
                 />
-                <button type="submit" aria-label="Send message">
+                <button onClick={handleSend} aria-label="Send Message">
                     <FaPaperPlane />
                 </button>
-            </form>
+            </div>
         </div>
     );
 }
+
+export default ChatBox;

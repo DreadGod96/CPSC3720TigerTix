@@ -1,4 +1,3 @@
-import React from 'react';
 import './BookingConfirmationModal.css';
 
 const BookingConfirmationModal = ({ isOpen, onClose, onConfirm, details }) => {

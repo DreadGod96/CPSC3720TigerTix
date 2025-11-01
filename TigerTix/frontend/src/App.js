@@ -6,14 +6,12 @@ import './App.css';
 import HomeScreenHeading from './components/HomeScreenHeading/HomeScreenHeading';
 import EventList from './components/EventList/EventList';
 import VoiceInput from './components/VoiceInput/VoiceInput';
-import ChatBox from './components/ChatBox/ChatBox';
-import BookingConfirmationModal from './components/BookingConfirmationModal/BookingConfirmationModal';
+import ChatBox from './components/ChatBox/ChatBox.jsx';
+import BookingConfirmationModal from './components/BookingConfirmationModal/BookingConfirmationModal.jsx';
 
 
-//Defines / constants
 const app_title = "TigerTix";
 export const CLEMSON_LOGO = "/paw-orange.png";
-
 
 
 function App() {
