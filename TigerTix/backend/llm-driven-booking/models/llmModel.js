@@ -46,7 +46,6 @@ function parseModelResponse(modelResponse) {
         //Remove markdown wrapper
         const jsonString = modelResponse.replace(/```json\n|```/g, '');
         const parsedJson = JSON.parse(jsonString);
-        
         //Validate data types and structure, if valid, return
         if (parsedJson.event && typeof parsedJson.tickets === 'number') {
             return parsedJson;
