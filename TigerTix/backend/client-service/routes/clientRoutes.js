@@ -1,7 +1,7 @@
 import express from 'express';
 import {
     getEvents,
-    purchaseTickets
+    purchaseTicket
 } from '../controllers/clientController.js';
 
 const router = express.Router();
@@ -13,6 +13,6 @@ router.get('/', getEvents);
 
 //POST /api/events/:id/purchase
 //Decrease ticket count
-router.post('/:id/purchase', purchaseTickets);
+router.post('/:id/purchase', purchaseTicket);
 
 export default router;

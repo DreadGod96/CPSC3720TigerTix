@@ -125,7 +125,7 @@ const get = (database, sql_commands, parameters = []) => new Promise((resolve, r
  * - 'NO_TICKETS': If the event that is requested has 0 tickets available
  * - 'DB_UPDATE_ERROR': All other generic database failures that can occur
  */
-export const purchaseTickets = async (eventId, ticket_count) => {
+export const purchaseTicket = async (eventId) => {
     return new Promise((resolve, reject) => {
 
         // Execute SQL commands sequentially
@@ -142,25 +142,20 @@ export const purchaseTickets = async (eventId, ticket_count) => {
         
                 const current_tickets = row.number_of_tickets_available;
         
-                if (current_tickets <= 0 || current_tickets < ticket_count) {
+                if (current_tickets <= 0) {
                     await run(database, "ROLLBACK;");
                     return reject(new Error('NO_TICKETS'));
                 }
                 
-                const update_tickets_sql_command = 'UPDATE events SET number_of_tickets_available = number_of_tickets_available - ? WHERE event_id = ?';
-                await run(database, update_tickets_sql_command, [ticket_count, eventId]);
+                const update_tickets_sql_command = 'UPDATE events SET number_of_tickets_available = number_of_tickets_available - 1 WHERE event_id = ?';
+                await run(database, update_tickets_sql_command, [eventId]);
         
                 await run(database, "COMMIT;");
         
-                resolve(current_tickets - ticket_count);
+                resolve(current_tickets - 1);
         
             } catch (error) {
                 console.error("Database transaction failed:", error.message);
-                try {
-                    await run(database, "ROLLBACK;");
-                } catch (rollbackError) {
-                    console.error("Rollback failed:", rollbackError.message);
-                }
                 reject(new Error('DB_UPDATE_ERROR'));
             }
         });
@@ -170,7 +165,7 @@ export const purchaseTickets = async (eventId, ticket_count) => {
 
 const Event = {
     findAllEvents,
-    purchaseTickets,
+    purchaseTicket,
     findMatchingEvents
 };
 

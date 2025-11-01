@@ -41,16 +41,13 @@ function App() {
     }, []);
 
     // Attempt to buy ticket from given event
-    const buyTicket = async (eventName, eventID, ticket_count = 1) => {
+    const buyTicket = async (eventName, eventID) => {
         try {
             const response = await fetch(`http://localhost:6001/api/events/${eventID}/purchase`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({
-                    ticket_count: ticket_count
-                })
             });
 
             if (!response.ok) {
@@ -94,7 +91,7 @@ function App() {
     const handleConfirmBooking = () => {
         try {
             if (bookingDetails) {
-                buyTicket(bookingDetails.event_name, bookingDetails.event_id, bookingDetails.tickets_to_book);
+                buyTicket(bookingDetails.event_name, bookingDetails.event_id);
             }
         } catch (error) {
             console.error('Error handling event booking:', error);
