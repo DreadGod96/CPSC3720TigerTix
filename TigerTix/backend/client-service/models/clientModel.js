@@ -45,6 +45,8 @@ export const findAllEvents = async () => {
  * @returns {Promise<Array<object>>} A promise that resolves with an array of matching event objects.
  */
 export const findMatchingEvents = async (filters = {}) => {
+    console.log(`FindMatchingEvents, filters: ${JSON.stringify(filters)}`)
+
     // If no filters are provided, default to returning all events.
     if (!filters || Object.keys(filters).length === 0) {
         return findAllEvents();

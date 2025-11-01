@@ -7,6 +7,7 @@ import HomeScreenHeading from './components/HomeScreenHeading/HomeScreenHeading'
 import EventList from './components/EventList/EventList';
 import VoiceInput from './components/VoiceInput/VoiceInput';
 import ChatBox from './components/ChatBox/ChatBox';
+import BookingConfirmationModal from './components/BookingConfirmationModal/BookingConfirmationModal';
 
 
 //Defines / constants
@@ -23,7 +24,11 @@ function App() {
     const [chatMessages, setChatMessages] = useState([
         { sender: 'bot', text: 'Hi! How can I help you find tickets today?' }
     ]);
+
     const [isChatLoading, setIsChatLoading] = useState(false);
+
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [bookingDetails, setBookingDetails] = useState(null);
 
     // Attempt to fetch events from client service
     const fetchEvents = () => {
@@ -37,6 +42,7 @@ function App() {
         fetchEvents();
     }, []);
 
+    // Attempt to buy ticket from given event
     const buyTicket = async (eventName, eventID) => {
         try {
             const response = await fetch(`http://localhost:6001/api/events/${eventID}/purchase`, {
@@ -79,6 +85,70 @@ function App() {
         //Buy tickets
     }
 
+    const handleAiBooking = (bookingDetails) => {
+        setBookingDetails(bookingDetails);
+        setIsModalOpen(true);
+    };
+
+    const handleConfirmBooking = () => {
+        try {
+            if (bookingDetails) {
+                buyTicket(bookingDetails.event_name, bookingDetails.event_id);
+            }
+        } catch (error) {
+            console.error('Error handling event booking:', error);
+            alert(`Error: ${error.message}`);
+            setStatusMessage(`Error: ${error.message}`);
+        }
+        setIsModalOpen(false);
+        setBookingDetails(null);
+    };
+
+    const onSendMessage = async (message) => {
+        
+        // Add user's message to the chat immediately
+        const newUserMessage = { sender: 'user', text: message };
+        setChatMessages(prevMessages => [...prevMessages, newUserMessage]);
+        setIsChatLoading(true);
+        console.log(chatMessages);
+
+        try {
+            
+            const response = await fetch('http://localhost:7001/api/llm/parse', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    user_input: message,
+                    chat_history: chatMessages, 
+                }),
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to get response from chatbot.');
+            }
+
+            const data = await response.json();
+            
+            setChatMessages(prev => [...prev, { sender: 'bot', text: data.model_response.text }]);
+            console.log(data);
+
+
+            if(data.booking_details){
+                console.log('handling');
+                handleAiBooking(data.booking_details);
+            }
+
+        } catch (error) {
+            console.error("Error sending message to chatbot:", error);
+            setChatMessages(prev => [...prev, { sender: 'bot', text: error.message }]);
+        
+        } finally {
+            setIsChatLoading(false);
+        }
+    };
+
     return (
         <div className="App">
             <HomeScreenHeading
@@ -92,6 +162,13 @@ function App() {
             <ChatBox 
                 messages={chatMessages}
                 isLoading={isChatLoading}
+                onSendMessage={onSendMessage}
+            />
+            <BookingConfirmationModal
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+                onConfirm={handleConfirmBooking}
+                details={bookingDetails}
             />
             <h1>Current Available Events: </h1>
             <EventList

@@ -1,0 +1,64 @@
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background: white;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    width: 90%;
+    max-width: 500px;
+    text-align: center;
+    color: #333;
+}
+
+.modal-content h2 {
+    margin-top: 0;
+    color: #D66300; /* Clemson Orange */
+}
+
+.booking-details {
+    text-align: left;
+    margin: 1.5rem 0;
+    padding: 1rem;
+    background-color: #f9f9f9;
+    border-left: 4px solid #522D80; /* Clemson Purple */
+}
+
+.booking-details p {
+    margin: 0.5rem 0;
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: space-around;
+    margin-top: 1.5rem;
+}
+
+.modal-actions button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1rem;
+}
+
+.confirm-button {
+    background-color: #522D80; /* Clemson Purple */
+    color: white;
+}
+
+.cancel-button {
+    background-color: #ccc;
+    color: #333;
+}

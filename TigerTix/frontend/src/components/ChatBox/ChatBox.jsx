@@ -40,7 +40,7 @@ export default function ChatBox({ messages, onSendMessage, isLoading }) {
                     value={userInput}
                     onChange={(e) => setUserInput(e.target.value)}
                     placeholder="Type your message..."
-                    aria-label="Chat message"
+                    aria-label="Message input box"
                 />
                 <button type="submit" aria-label="Send message">
                     <FaPaperPlane />
