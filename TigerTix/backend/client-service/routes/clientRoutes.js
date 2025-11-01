@@ -7,7 +7,8 @@ import {
 const router = express.Router();
 
 //GET /api/events
-//Returns event list
+//Returns event list. Can be filtered with query parameters.
+//Example: /api/events?event_name=Movie Night
 router.get('/', getEvents);
 
 //POST /api/events/:id/purchase

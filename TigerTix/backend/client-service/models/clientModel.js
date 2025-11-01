@@ -35,6 +35,51 @@ export const findAllEvents = async () => {
         });
     });
 };
+
+/**
+ * Fetches events from the database that match the provided filters.
+ * If no filters are provided, it returns all events.
+ * @param {object} [filters={}] An object containing key-value pairs to filter on.
+ * @param {string} [filters.event_name] - The name of the event to search for (partial match).
+ * @param {string} [filters.event_date] - The exact date of the event to search for (YYYY-MM-DD).
+ * @returns {Promise<Array<object>>} A promise that resolves with an array of matching event objects.
+ */
+export const findMatchingEvents = async (filters = {}) => {
+    // If no filters are provided, default to returning all events.
+    if (!filters || Object.keys(filters).length === 0) {
+        return findAllEvents();
+    }
+
+    let sql_command = 'SELECT event_name, event_date, number_of_tickets_available, price_of_a_ticket FROM events';
+    const where_clauses = [];
+    const parameters = [];
+    const valid_columns = ['event_name', 'event_date', 'price_of_a_ticket', 'number_of_tickets_available'];
+
+    for (const key in filters) {
+        if (Object.prototype.hasOwnProperty.call(filters, key) && valid_columns.includes(key)) {
+            if (key === 'event_name') {
+                where_clauses.push(`${key} LIKE ?`);
+                parameters.push(`%${filters[key]}%`);
+            } else {
+                where_clauses.push(`${key} = ?`);
+                parameters.push(filters[key]);
+            }
+        }
+    }
+
+    if (where_clauses.length > 0) {
+        sql_command += ' WHERE ' + where_clauses.join(' AND ');
+    }
+
+    sql_command += ' ORDER BY event_id;';
+
+    return new Promise((resolve, reject) => {
+        database.all(sql_command, parameters, (error, rows) => {
+            if (error) reject(error);
+            else resolve(rows);
+        });
+    });
+};
  
 /**
  * Helper function to promisify database.run
@@ -118,7 +163,8 @@ export const purchaseTicket = async (eventId) => {
 
 const Event = {
     findAllEvents,
-    purchaseTicket
+    purchaseTicket,
+    findMatchingEvents
 };
 
 export default Event;

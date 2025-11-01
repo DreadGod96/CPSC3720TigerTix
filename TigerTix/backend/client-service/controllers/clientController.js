@@ -3,7 +3,7 @@ import queueService from "../services/queueService.js";
 
 /**
  * Handles request for retrieving all events from the database
- * On success, responds with a 200 status and a JSON array of all events in the database
+ * On success, responds with a 200 status and a JSON array of events, filtered by query parameters if provided.
  * On failure, responds with a 500 status and error message
  * @route GET api/events
  * @param {object} request Express request object
@@ -11,7 +11,9 @@ import queueService from "../services/queueService.js";
  */
 export const getEvents = async (request, response) => {
     try {
-        const createTask = () => Event.findAllEvents(request.body);
+        
+        const filters = request.query;
+        const createTask = () => Event.findMatchingEvents(filters);
         const events = await queueService.addToQueue(createTask);
         response.status(200).json(events);
     }
