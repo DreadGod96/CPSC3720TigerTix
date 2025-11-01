@@ -37,8 +37,9 @@ export const getEvents = async (request, response) => {
  * @param {string} request.param.id The ID of the event that the ticket is being bought for
  * @param {object} response Express response object, sends response back to client
  */
-export const purchaseTicket = async (request, response) => {
+export const purchaseTickets = async (request, response) => { // Renamed to purchaseTickets
     const eventId = parseInt(request.params.id);
+    const { ticket_count } = request.body; // Get ticket_count from the request body
 
     //Validate event id input
     if (isNaN(eventId) || eventId <= 0) {
@@ -47,14 +48,23 @@ export const purchaseTicket = async (request, response) => {
         });
     }
 
+    //Validate ticket_count input
+    if (isNaN(ticket_count) || ticket_count <= 0) {
+        return response.status(400).json({
+            error: 'Invalid ticket count.'
+        });
+    }
+
     try {
-        const createTask = () => Event.purchaseTicket(eventId);
+        // Pass both eventId and ticket_count to the model function
+        const createTask = () => Event.purchaseTickets(eventId, ticket_count); // Renamed to purchaseTickets
         const event = await queueService.addToQueue(createTask);
 
         response.status(200).json({
             message: 'Ticket purchase successful.',
             success: true,
-            event_id: eventId
+            event_id: eventId,
+            tickets_purchased: ticket_count
         });
     }
     catch (error) {
@@ -68,7 +78,8 @@ export const purchaseTicket = async (request, response) => {
 
             //400 error
             case 'NO_TICKETS':
-                return response.status(400).json({ error: 'Purchase failed: No tickets available.' });
+                // Send back a more dynamic error message if possible
+                return response.status(400).json({ error: 'Purchase failed: Not enough tickets available.' });
 
             //500 error
             case 'DB_CHECK_ERROR':
