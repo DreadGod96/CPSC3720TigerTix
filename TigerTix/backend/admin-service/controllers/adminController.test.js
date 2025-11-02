@@ -24,9 +24,9 @@ jest.unstable_mockModule('../models/adminModel.js', () => ({
 // Setup database
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const testDbPath = path.join(__dirname, '..', '..', 'shared-db', 'test-database.sqlite');
-const initSqlPath = path.join(__dirname, '..', '..', 'shared-db', 'init.sql');
-const initSql = fs.readFileSync(initSqlPath, 'utf-8');
+const TEST_DATABASE_PATH = path.join(__dirname, '..', '..', 'shared-db', 'test-database.sqlite');
+const INIT_SQL_PATH = path.join(__dirname, '..', '..', 'shared-db', 'init.sql');
+const INIT_SQL = fs.readFileSync(INIT_SQL_PATH, 'utf-8');
 let db;
 
 
@@ -50,16 +50,16 @@ describe('Admin Controller - /api/events', () => {
         mockEventCreate.mockClear();
 
         // Set up the test database
-        if (fs.existsSync(testDbPath)) {
-            fs.unlinkSync(testDbPath);
+        if (fs.existsSync(TEST_DATABASE_PATH)) {
+            fs.unlinkSync(TEST_DATABASE_PATH);
         }
         
         await new Promise((resolve, reject) => {
-            db = new sqlite3.Database(testDbPath, (err) => {
+            db = new sqlite3.Database(TEST_DATABASE_PATH, (err) => {
 
                 if (err) return reject(err);
 
-                db.exec(initSql, (err) => {
+                db.exec(INIT_SQL, (err) => {
                     if (err) return reject(err);
                     db.close((err) => {
                         if (err) return reject(err);
@@ -73,8 +73,8 @@ describe('Admin Controller - /api/events', () => {
 
     // Clean up the test database
     afterEach(() => {
-        if (fs.existsSync(testDbPath)) {
-            fs.unlinkSync(testDbPath);
+        if (fs.existsSync(TEST_DATABASE_PATH)) {
+            fs.unlinkSync(TEST_DATABASE_PATH);
         }
     });
 
