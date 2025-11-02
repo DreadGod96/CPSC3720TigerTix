@@ -230,23 +230,27 @@ export async function manageConversation(user_input, conversation_history = []) 
             }
 
             // Get the model's final text response and the updated history
-            const final_response = await chat.sendMessage({
+            const final_response_object = await chat.sendMessage({
                 message: [
                     cleaned_input, 
                     {
                         functionResponse: tool_function_response
                     }
                 ]
-            }).then(
-                    (response) => response.candidates.at(0).content.parts.at(0)
-                )
+            });
+
+            if (final_response_object.candidates[0].finishReason === 'SAFETY') {
+                throw new Error('MODEL_RESPONSE_BLOCKED');
+            }
+
+            const final_response_part = final_response_object.candidates.at(0).content.parts.at(0);
 
             const updated_chat_history = await chat.getHistory();
             const booking_details = tool_function_response.response.tool_result ? 
                 JSON.parse(tool_function_response.response.tool_result).booking_details : null;
 
             return { 
-                response: final_response, 
+                response: final_response_part, 
                 history: updated_chat_history,
                 booking_details: booking_details,
             };
@@ -254,19 +258,32 @@ export async function manageConversation(user_input, conversation_history = []) 
         } else {
 
             // If no tool is called, return the model's text response
+            let final_response_part;
+
             try {
-                const final_response = response.text();
-                const updated_chat_history = await chat.getHistory();
-                return { 
-                    response: final_response, 
-                    history: updated_chat_history,
-                    booking_details: null,
-                };
+                if (!response.candidates || response.candidates.length === 0 || response.candidates[0].finishReason === 'SAFETY') {
+                    throw new Error('MODEL_RESPONSE_BLOCKED');
+                }
+
+                // Get the response Part object
+                final_response_part = response.candidates[0].content.parts[0];
+
+                // Check if the part is empty or not text
+                if (!final_response_part || typeof final_response_part.text === 'undefined') {
+                     throw new Error('INVALID_MODEL_RESPONSE');
+                }
             } catch (e) {
                 
                 console.error("Could not get text from model response:", e);
                 throw new Error('MODEL_RESPONSE_BLOCKED');
             }
+
+            const updated_chat_history = await chat.getHistory();
+            return {
+                response: final_response_part,
+                history: updated_chat_history,
+                booking_details: null,
+            };
         }
 
     } catch (error) {

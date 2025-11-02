@@ -37,8 +37,9 @@ export const getEvents = async (request, response) => {
  * @param {string} request.param.id The ID of the event that the ticket is being bought for
  * @param {object} response Express response object, sends response back to client
  */
-export const purchaseTicket = async (request, response) => {
+export const purchaseTickets = async (request, response) => {
     const eventId = parseInt(request.params.id);
+    const { ticket_count } = request.body
 
     //Validate event id input
     if (isNaN(eventId) || eventId <= 0) {
@@ -48,13 +49,14 @@ export const purchaseTicket = async (request, response) => {
     }
 
     try {
-        const createTask = () => Event.purchaseTicket(eventId);
+        const createTask = () => Event.purchaseTickets(eventId, ticket_count);
         const event = await queueService.addToQueue(createTask);
 
         response.status(200).json({
             message: 'Ticket purchase successful.',
             success: true,
-            event_id: eventId
+            event_id: eventId,
+            tickets_purchased: ticket_count
         });
     }
     catch (error) {
@@ -68,7 +70,7 @@ export const purchaseTicket = async (request, response) => {
 
             //400 error
             case 'NO_TICKETS':
-                return response.status(400).json({ error: 'Purchase failed: No tickets available.' });
+                return response.status(400).json({ error: 'Purchase failed: Not enough tickets available.' });
 
             //500 error
             case 'DB_CHECK_ERROR':
