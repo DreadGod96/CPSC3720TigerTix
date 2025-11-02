@@ -4,18 +4,15 @@ import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-
-const isTestEnv = process.env.NODE_ENV === 'test';
-const dbName = isTestEnv ? 'test-database.sqlite' : 'database.sqlite';
-const database_path = path.join(__dirname, '..', '..', 'shared-db', dbName);
+const IS_TEST_ENV = process.env.NODE_ENV === 'test';
+const DATABASE_NAME = IS_TEST_ENV ? 'test-database.sqlite' : 'database.sqlite';
+const DATABASE_PATH = path.join(__dirname, '..', '..', 'shared-db', DATABASE_NAME);
 
 const sqlite_3 = sqlite3.verbose();
 
-const database = new sqlite_3.Database(database_path, sqlite3.OPEN_READWRITE, (error) => {
+const database = new sqlite_3.Database(DATABASE_PATH, sqlite3.OPEN_READWRITE, (error) => {
     if (error) {
         console.error("Client Model Error: Failed to connect to the database.", error.message);
-    } else {
-        console.log('Client Model connected to the SQLite database.');
     }
 });
 
@@ -52,8 +49,6 @@ export const findAllEvents = async () => {
  * @returns {Promise<Array<object>>} A promise that resolves with an array of matching event objects.
  */
 export const findMatchingEvents = async (filters = {}) => {
-    console.log(`FindMatchingEvents, filters: ${JSON.stringify(filters)}`)
-
     // If no filters are provided, default to returning all events.
     if (!filters || Object.keys(filters).length === 0) {
         return findAllEvents();
@@ -123,57 +118,87 @@ const get = (database, sql_commands, parameters = []) => new Promise((resolve, r
 });
  
 /**
- * Simulates the purchase of a single ticket, and decrements the number of tickets for an event in the 
- * database by 1
- * @param {number} eventId The id of the event that someone is purchasing a ticket for
+ * Simulates the purchase of tickets, and decrements the number of tickets for an event in the 
+ * database by ticket_count
+ * @param {number} event_id The ID of the event that someone is purchasing a ticket for
+ * @param {number} ticket_count The number of tickets being purchased
  * @returns {Promise<number>} Promise that resolves with the updated number of tickets for an event
  * @throws {Error} throws an error and a specific message based on what caused the error:
- * - 'NOT_FOUND': If no event exists with the id of eventId in the database
+ * - 'NOT_FOUND': If no event exists with the id of event_id in the database
  * - 'NO_TICKETS': If the event that is requested has 0 tickets available
  * - 'DB_UPDATE_ERROR': All other generic database failures that can occur
  */
-export const purchaseTickets = async (eventId, ticket_count) => {
+export const purchaseTickets = async (event_id, ticket_count) => {
     return new Promise((resolve, reject) => {
 
-        // Execute SQL commands sequentially
-        database.serialize(async () => {
-            try {
-                await run(database, "BEGIN TRANSACTION;");
-                
-                const row = await get(database, 'SELECT number_of_tickets_available FROM events WHERE event_id = ?', [eventId]);
-        
+        database.serialize(() => {
+            
+            database.run("BEGIN TRANSACTION;", (err) => {
+                if (err) {
+                    console.error("BEGIN TRANSACTION failed:", err.message);
+                    return reject(new Error('DB_UPDATE_ERROR'));
+                }
+            });
+
+            database.get('SELECT number_of_tickets_available FROM events WHERE event_id = ?', [event_id], (err, row) => {
+                if (err) {
+                    database.run("ROLLBACK;");
+                    return reject(new Error('DB_CHECK_ERROR'));
+                }
                 if (!row) {
-                    await run(database, "ROLLBACK;");
+                    database.run("ROLLBACK;");
                     return reject(new Error('NOT_FOUND'));
                 }
-        
+            
                 const current_tickets = row.number_of_tickets_available;
-        
+            
                 if (current_tickets <= 0 || current_tickets < ticket_count) {
-                    await run(database, "ROLLBACK;");
+                    database.run("ROLLBACK;");
                     return reject(new Error('NO_TICKETS'));
                 }
                 
                 const update_tickets_sql_command = 'UPDATE events SET number_of_tickets_available = number_of_tickets_available - ? WHERE event_id = ?';
-                await run(database, update_tickets_sql_command, [ticket_count, eventId]);
-        
-                await run(database, "COMMIT;");
-        
-                resolve(current_tickets - ticket_count);
-        
-            } catch (error) {
-                console.error("Database transaction failed:", error.message);
-                reject(new Error('DB_UPDATE_ERROR'));
-            }
+                database.run(update_tickets_sql_command, [ticket_count, event_id], function (err) {
+                    if (err) {
+                        database.run("ROLLBACK;");
+                        return reject(new Error('DB_UPDATE_ERROR'));
+                    }
+                });
+
+                database.run("COMMIT;", (err) => {
+                    if (err) {
+                        database.run("ROLLBACK;");
+                        return reject(new Error('COMMIT_ERROR'));
+                    }
+                    resolve(current_tickets - ticket_count);
+                });
+
+            });
         });
     });
 };
 
+/**
+ * Closes the database connection. Used for testing
+ * @returns {Promise<void>}
+ */
+function close() {
+    return new Promise((resolve, reject) => {
+        database.close((err) => {
+            if (err) {
+                console.error('Failed to close client model DB:', err.message);
+                return reject(err);
+            }
+            resolve();
+        });
+    });
+}
 
 const Event = {
     findAllEvents,
     purchaseTickets,
-    findMatchingEvents
+    findMatchingEvents,
+    close
 };
 
 export default Event;
