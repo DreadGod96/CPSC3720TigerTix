@@ -1,19 +1,9 @@
 import "./VoiceInput.css";
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { FaMicrophone } from 'react-icons/fa';
 
 //Ensure browser compatibility
-const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition; let recognition;
-if (SpeechRecognition) {
-    recognition = new SpeechRecognition();
-    recognition.interimResults = false;
-    recognition.continuous = false;
-    recognition.lang = 'en-US';
-    recognition.maxAlternatives = 1;
-}
-else {
-    console.log("Web Speech API is not supported by this browser.");
-}
+const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
 //Create beep sound with Web Audio API
 const playBeep = () => {
@@ -26,13 +16,83 @@ const playBeep = () => {
     setTimeout(() => { oscillator.stop(); }, 200);
 };
 
-
+let recognition;
+if (SpeechRecognition){
+    recognition = new SpeechRecognition();
+    recognition.interimResults = false;
+    recognition.continuous = false;
+    recognition.lang = 'en-US';
+    recognition.maxAlternatives = 1;
+    console.log("VoiceInput: Global singleton recognition object created.");
+}
+else{
+    console.log("VoiceInput: No SpeechRecognition support.");
+}
 const VoiceInput = ({ onSpeechResult }) => {
 
     //Set inital states of listening, text, and error messaging
     const [isListening, setIsListening] = useState(false);
     const [transcript, setTranscript] = useState('');
     const [error, setError] = useState('');
+
+    const onSpeechResultRef = useRef(onSpeechResult);
+    useEffect(() => {
+        onSpeechResultRef.current = onSpeechResult;
+    }, [onSpeechResult]);
+
+    useEffect(() => {
+        if (!recognition) {
+            setError("Web Speech API is not supported by this browser.");
+            return;
+        }
+
+        console.log("VoiceInput: useEffect Attaching handlers to global object");
+
+        recognition.onstart = () => {
+            console.log("VoiceInput: recognition.onStart (Listening...)");
+            setIsListening(true);
+        };
+
+        recognition.onend = () => {
+            console.log("VoiceInput: recognition.onEnd (Stopped listening)");
+            setIsListening(false);
+        };
+
+        recognition.onerror = (event) => {
+            console.error("VoiceInput: recognition.onError", event.error);
+            if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
+                setError("Microphone permission denied. Please allow it in your browser settings.");
+            } else {
+                setError(`Speech recognition error: ${event.error}`);
+            }
+        };
+
+        recognition.onresult = (event) => {
+            console.log("VoiceInput: recognition.onResult (Got transcript)");
+            const currentTranscript = event.results[0][0].transcript;
+            setTranscript(currentTranscript);
+
+            // Call the function from the ref
+            if (onSpeechResultRef.current) {
+                onSpeechResultRef.current(currentTranscript);
+            } else {
+                console.error("VoiceInput: onSpeechResultRef.current is not a function");
+            }
+        };
+
+        // Cleanup function: We ONLY detach handlers.
+        // We NEVER destroy the recognition object.
+        return () => {
+            console.log("VoiceInput: useEffect cleanup (detaching handlers)");
+            recognition.onstart = null;
+            recognition.onend = null;
+            recognition.onerror = null;
+            recognition.onresult = null;
+        };
+
+    // ** EMPTY dependency array. **
+    // This hook runs ONCE per component mount and never again.
+    }, []);
 
     const handleMicClick = () => {
         //Redundant verification for browser support on click
@@ -50,34 +110,14 @@ const VoiceInput = ({ onSpeechResult }) => {
             playBeep();
             setTranscript('');
             setError('');
-            recognition.start();
+            try{
+                recognition.start();
+            } catch (error){
+                console.error("VoiceInput: Error on recognition.start()", error);
+                setError(`Error starting: ${error.message}`);
+            }
         }
     };
-
-    //Setup logic, after mic is added to screen
-    useEffect(() => {
-        //Ensure browser compatibility
-        if (!recognition) { return; }
-
-        recognition.onStart = () => setIsListening(true);
-        recognition.onEnd = () => setIsListening(false);
-        recognition.onError = (event) => setError('Speech recognition error: ${event.error}');
-        //After speaking, text is transcribed and passed back to app.js
-        recognition.onResult = (event) => {
-            const currentTranscript = event.results[0][0].transcript;
-            setTranscript(currentTranscript);
-            onSpeechResult(currentTranscript);
-        };
-
-        //Cleanup after effect use
-        return () => {
-            recognition.onStart = null;
-            recognition.onEnd = null;
-            recognition.onError = null;
-            recognition.onResult = null;
-        };
-    },
-        [onSpeechResult]);
 
     return (
         <div className="voice-input-container">
