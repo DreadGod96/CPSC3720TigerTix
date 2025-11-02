@@ -5,13 +5,13 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const isTestEnv = process.env.NODE_ENV === 'test';
-const dbName = isTestEnv ? 'test-database.sqlite' : 'database.sqlite';
-const database_path = path.join(__dirname, '..', '..', 'shared-db', dbName);
+const IS_TEST_ENV = process.env.NODE_ENV === 'test';
+const DATABASE_NAME = IS_TEST_ENV ? 'test-database.sqlite' : 'database.sqlite';
+const DATABASE_PATH = path.join(__dirname, '..', '..', 'shared-db', DATABASE_NAME);
 
 const sqlite_3 = sqlite3.verbose();
 
-const database = new sqlite_3.Database(database_path, (error) => {
+const database = new sqlite_3.Database(DATABASE_PATH, (error) => {
     if (error) {
         console.error("Admin Model Error: Failed to connect to the database.", error.message);
     }
@@ -20,13 +20,13 @@ const database = new sqlite_3.Database(database_path, (error) => {
 /**
  * Attempts to create a new event and add it to the database. If valid event data is passed, an event is
  * created and added to the database. If it is not, an error is returned.
- * @param {object} eventData The data for the event (name, date, number of tickets, price of tickets)
+ * @param {object} event_data The data for the event (name, date, number of tickets, price of tickets)
  * @returns {Promise<object>} A promise that resolves with the newly created event object. On failure,
  * rejects with an error.
  */
-function create(eventData) {
+function create(event_data) {
     return new Promise((resolve, reject) => {
-        const {event_name, event_date, number_of_tickets_available, price_of_a_ticket} = eventData;
+        const {event_name, event_date, number_of_tickets_available, price_of_a_ticket} = event_data;
 
         // Validate request has necessary data
         if (!event_name || !event_date || number_of_tickets_available == null || price_of_a_ticket == null) {
@@ -47,39 +47,53 @@ function create(eventData) {
 
         // Run sql_commands queries sequentially
         database.serialize(() => {
-
-            // Begin transaction
             database.run("BEGIN TRANSACTION;", (error) => {
-                if (error){
+                if (error) {
                     return reject(error);
                 }
             });
 
-            // Attempt to create new event
+            let last_id;
+
             database.run(sql_commands, sql_parameters, function (error) {
                 if (error) {
                     database.run("ROLLBACK;");
                     console.error("Error in Event.create:", error.message);
                     return reject(new Error('Failed to create the event in the database.'));
                 }
-                
+                last_id = this.last_id;
             });
 
-            database.run("COMMIT;", (commitError) =>{
-                if (commitError){
+            database.run("COMMIT;", (commit_error) =>{
+                if (commit_error) {
                     database.run("ROLLBACK;");
-                    return reject(commitError);
+                    return reject(commit_error);
                 }
-                resolve({ event_id: this.lastID, ...eventData });
+                resolve({ event_id: last_id, ...event_data });
             });
-
         });
     });
 }
 
-// Export object for controller
+/**
+ * Closes the database connection. Used for testing
+ * @returns {Promise<void>}
+ */
+function close() {
+    return new Promise((resolve, reject) => {
+        database.close((err) => {
+            if (err) {
+                console.error('Failed to close admin model DB:', err.message);
+                return reject(err);
+            }
+            resolve();
+        });
+    });
+}
+
 const Event = {
-    create
+    create,
+    close, 
 };
 
 export default Event;
