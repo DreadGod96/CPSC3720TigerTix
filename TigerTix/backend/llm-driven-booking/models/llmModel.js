@@ -25,7 +25,7 @@ const SAFETY_SETTINGS = [
  * @param {*} user_input The string that is entered by the user
  * @returns {Promise<string>} A promise that resolves with the cleaned string.
  */
-function cleanInput(user_input) {
+export function cleanInput(user_input) {
     return new Promise((resolve, reject) => {
         if(typeof user_input !== 'string') {
             return reject(new Error('INVALID_INPUT_TYPE'));
@@ -56,7 +56,7 @@ function cleanInput(user_input) {
  * @param {string} [args.event_name] The name of the event to search for.
  * @returns {Promise<string>} A promise that resolves with a JSON string of event objects.
  */
-async function findEvents({ date, event_name }) {
+export async function findEvents({ date, event_name }) {
     try {
         const url = new URL(CLIENT_SERVICE_URL);
         const params = new URLSearchParams();
@@ -94,7 +94,7 @@ async function findEvents({ date, event_name }) {
  * @param {number} args.ticket_count The number of tickets to book.
  * @returns {Promise<string>} A promise that resolves with a JSON string of a confirmation object.
  */
-async function bookTickets({ event_name, ticket_count }) {
+export async function bookTickets({ event_name, ticket_count }) {
     try {
         const response = await fetch(CLIENT_SERVICE_URL);
         if (!response.ok) {
