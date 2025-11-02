@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import './ChatBox.css';
 import { FaRobot, FaUser, FaPaperPlane } from 'react-icons/fa';
+import VoiceInput from '../VoiceInput/VoiceInput';
 
 const ChatBox = ({ messages, isLoading, onSendMessage }) => {
     const [isOpen, setIsOpen] = useState(false);
@@ -69,6 +70,7 @@ const ChatBox = ({ messages, isLoading, onSendMessage }) => {
                 <div ref={messagesEndRef} />
             </div>
             <div className="chatbox-input">
+                <VoiceInput onSpeechResult={setInputValue} />
                 <input
                     type="text"
                     value={inputValue}
@@ -77,7 +79,7 @@ const ChatBox = ({ messages, isLoading, onSendMessage }) => {
                     placeholder="Type a message..."
                     aria-label="Chat input"
                 />
-                <button onClick={handleSend} aria-label="Send Message">
+                <button className="send-button" onClick={handleSend} aria-label="Send Message">
                     <FaPaperPlane />
                 </button>
             </div>

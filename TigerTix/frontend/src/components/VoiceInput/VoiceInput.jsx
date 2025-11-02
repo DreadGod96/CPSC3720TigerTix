@@ -23,14 +23,12 @@ if (SpeechRecognition){
     recognition.continuous = false;
     recognition.lang = 'en-US';
     recognition.maxAlternatives = 1;
-    console.log("VoiceInput: Global singleton recognition object created.");
+} else {
+    console.error("Web Speech API is not supported by this browser.");
 }
-else{
-    console.log("VoiceInput: No SpeechRecognition support.");
-}
+
 const VoiceInput = ({ onSpeechResult }) => {
 
-    //Set inital states of listening, text, and error messaging
     const [isListening, setIsListening] = useState(false);
     const [transcript, setTranscript] = useState('');
     const [error, setError] = useState('');
@@ -46,15 +44,11 @@ const VoiceInput = ({ onSpeechResult }) => {
             return;
         }
 
-        console.log("VoiceInput: useEffect Attaching handlers to global object");
-
         recognition.onstart = () => {
-            console.log("VoiceInput: recognition.onStart (Listening...)");
             setIsListening(true);
         };
 
         recognition.onend = () => {
-            console.log("VoiceInput: recognition.onEnd (Stopped listening)");
             setIsListening(false);
         };
 
@@ -68,11 +62,9 @@ const VoiceInput = ({ onSpeechResult }) => {
         };
 
         recognition.onresult = (event) => {
-            console.log("VoiceInput: recognition.onResult (Got transcript)");
             const currentTranscript = event.results[0][0].transcript;
             setTranscript(currentTranscript);
 
-            // Call the function from the ref
             if (onSpeechResultRef.current) {
                 onSpeechResultRef.current(currentTranscript);
             } else {
@@ -80,39 +72,31 @@ const VoiceInput = ({ onSpeechResult }) => {
             }
         };
 
-        // Cleanup function: We ONLY detach handlers.
-        // We NEVER destroy the recognition object.
+        // Cleanup function to remove event listeners
         return () => {
-            console.log("VoiceInput: useEffect cleanup (detaching handlers)");
             recognition.onstart = null;
             recognition.onend = null;
             recognition.onerror = null;
             recognition.onresult = null;
         };
 
-    // ** EMPTY dependency array. **
-    // This hook runs ONCE per component mount and never again.
     }, []);
 
     const handleMicClick = () => {
-        //Redundant verification for browser support on click
         if (!SpeechRecognition) {
             setError("The browser does not support this operation.")
             return;
         }
 
-        //On-click, if recognition is listening, end listening
         if (isListening) {
             recognition.stop();
-        }
-        //Start listening: beep, reset text translation, reset error messaging
-        else {
+        } else {
             playBeep();
             setTranscript('');
             setError('');
-            try{
+            try {
                 recognition.start();
-            } catch (error){
+            } catch (error) {
                 console.error("VoiceInput: Error on recognition.start()", error);
                 setError(`Error starting: ${error.message}`);
             }

@@ -24,7 +24,7 @@
 
 .modal-content h2 {
     margin-top: 0;
-    color: #D66300; /* Clemson Orange */
+    color: #D66300; 
 }
 
 .booking-details {
@@ -32,7 +32,7 @@
     margin: 1.5rem 0;
     padding: 1rem;
     background-color: #f9f9f9;
-    border-left: 4px solid #522D80; /* Clemson Purple */
+    border-left: 4px solid #522D80; 
 }
 
 .booking-details p {
@@ -54,7 +54,7 @@
 }
 
 .confirm-button {
-    background-color: #522D80; /* Clemson Purple */
+    background-color: #522D80; 
     color: white;
 }
 

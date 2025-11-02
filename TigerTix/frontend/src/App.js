@@ -78,14 +78,6 @@ function App() {
         }
     };
 
-    const handleVoiceCommand = async (text) => {
-        //Send text to LLM
-        //Await LLM response-->should be { event: "Jazz Night", tickets: 2 }
-        //Find event details from 'events'
-        //Ask user to confirm
-        //Buy tickets
-    }
-
     const handleAiBooking = (bookingDetails) => {
         setBookingDetails(bookingDetails);
         setIsModalOpen(true);
@@ -110,25 +102,16 @@ function App() {
         // Add user's message to the chat immediately
         const newUserMessage = { sender: 'user', text: message };
         
-        // Use the "functional update" form of setState
-        // This lets us get the latest state without listing chatMessages as a dependency
         setChatMessages(prevMessages => [...prevMessages, newUserMessage]);
         setIsChatLoading(true);
         
         try {
-            // This is a problem: 'chat_history: chatMessages'
-            // The function will "close over" the 'chatMessages' state from when it was defined.
-            // We must use the functional update form to get the *current* history.
-
-            // Let's create history from the state update
             let currentChatHistory = [];
             setChatMessages(prevMessages => {
-                // 'prevMessages' here is the most-up-to-date state
                 currentChatHistory = prevMessages.map(msg => ({
                     role: msg.sender === 'bot' ? 'model' : 'user',
                     parts: [{ text: msg.text }]
                 }));
-                // We already added the new user message, so 'prevMessages' is correct
                 return prevMessages; 
             });
 
@@ -139,7 +122,6 @@ function App() {
                 },
                 body: JSON.stringify({
                     user_input: message,
-                    // Send the *actual current* chat history
                     chat_history: currentChatHistory, 
                 }),
             });
@@ -150,7 +132,6 @@ function App() {
 
             const data = await response.json();
             
-            // Use functional update here too
             setChatMessages(prev => [...prev, { sender: 'bot', text: data.model_response.text }]);
             console.log(data);
 
@@ -162,7 +143,6 @@ function App() {
 
         } catch (error) {
             console.error("Error sending message to chatbot:", error);
-            // And here
             setChatMessages(prev => [...prev, { sender: 'bot', text: error.message }]);
         
         } finally {
@@ -179,7 +159,6 @@ function App() {
             <div className="sr-only" aria-live="polite" role="status">
                 {statusMessage}
             </div>
-            <VoiceInput onSpeechResult={onSendMessage} />
             <ChatBox 
                 messages={chatMessages}
                 isLoading={isChatLoading}
