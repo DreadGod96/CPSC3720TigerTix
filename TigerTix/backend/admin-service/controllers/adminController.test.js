@@ -123,5 +123,67 @@ describe('Admin Controller - /api/events', () => {
             expect(response.body.success).toBe(false);
             expect(response.body.message).toContain('Missing required fields');
         });
+
+        it('should return 400 for a negative number of tickets', async () => {
+            const invalidEventData = {
+                event_name: 'Negative Ticket Event',
+                event_date: '2025-12-01',
+                number_of_tickets_available: -100,
+                price_of_a_ticket: 50,
+            };
+
+            const validationError = new Error("The number of tickets must be 0 or greater");
+            validationError.code = 'VALIDATION_ERROR';
+            mockEventCreate.mockRejectedValue(validationError);
+
+            const response = await request(app)
+                .post('/api/events')
+                .send(invalidEventData);
+
+            expect(response.statusCode).toBe(400);
+            expect(response.body.success).toBe(false);
+            expect(response.body.message).toBe("The number of tickets must be 0 or greater");
+        });
+
+        it('should return 400 when number_of_tickets_available is null', async () => {
+            const invalidEventData = {
+                event_name: 'Null Ticket Event',
+                event_date: '2025-12-01',
+                number_of_tickets_available: null, 
+                price_of_a_ticket: 50,
+            };
+
+            const validationError = new Error("Missing required fields: event name, date, number of tickets available, and price of each ticket");
+            validationError.code = 'VALIDATION_ERROR';
+            mockEventCreate.mockRejectedValue(validationError);
+
+            const response = await request(app)
+                .post('/api/events')
+                .send(invalidEventData);
+
+            expect(response.statusCode).toBe(400);
+            expect(response.body.success).toBe(false);
+            expect(response.body.message).toContain('Missing required fields');
+        });
+
+        it('should return 500 if a non-validation error occurs in the model', async () => {
+            const mockEventData = {
+                event_name: 'Database Fail Event',
+                event_date: '2025-12-01',
+                number_of_tickets_available: 100,
+                price_of_a_ticket: 50,
+            };
+
+            const dbError = new Error("A rare database error occurred");
+            mockEventCreate.mockRejectedValue(dbError);
+
+            const response = await request(app)
+                .post('/api/events')
+                .send(mockEventData);
+
+            expect(response.statusCode).toBe(500);
+            expect(response.body.success).toBe(false);
+            expect(response.body.message).toBe("Server error: Could not create the event");
+        });
     });
 });
