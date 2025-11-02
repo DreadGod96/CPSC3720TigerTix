@@ -4,19 +4,21 @@ import llmRoutes from './routes/llmRoutes.js';
 import './models/llmModel.js';
 
 const app = express();
-
-//Declare client service port
 const port = 7001;
 
-//Backend API 
+// Backend API 
 app.use(cors());
 app.use(express.json());
 
-//Routes
+// Routes
 app.use('/api/llm/parse', llmRoutes);
 
-//Start the server
-app.listen(port, () => {
-    console.log(`LLM service running on http://localhost:${port}`);
-});
+// Start the server if test is not set
+if (process.env.NODE_ENV !== 'test') {
+    app.listen(port, () => {
+        console.log(`LLM service running on http://localhost:${port}`);
+    });
+}
 
+// export for testing
+export default app;

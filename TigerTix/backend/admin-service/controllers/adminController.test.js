@@ -36,6 +36,7 @@ describe('Admin Controller - /api/events', () => {
     let Event;
 
    beforeEach(async () => {
+        // Dynamically import modules
         const appModule = await import('../server.js');
         app = appModule.default;
         
