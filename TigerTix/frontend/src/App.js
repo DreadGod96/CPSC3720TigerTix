@@ -14,24 +14,16 @@ const app_title = "TigerTix";
 export const CLEMSON_LOGO = "/paw-orange.png";
 
 const speak = (text) => {
-    // Check if the API is available
     if (!window.speechSynthesis) {
         console.warn("Browser does not support speech synthesis.");
         return;
     }
 
-    // Create a new speech utterance
     const utterance = new SpeechSynthesisUtterance(text);
-    
-    // Optional: You can configure the voice, pitch, and rate here
-    // utterance.voice = ...
-    // utterance.pitch = 1;
-    // utterance.rate = 1;
+    utterance.lang = 'en-US';
 
-    // Cancel any previous speech to avoid overlap
+
     window.speechSynthesis.cancel();
-    
-    // Speak the new text
     window.speechSynthesis.speak(utterance);
 };
 
