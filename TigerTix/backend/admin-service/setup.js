@@ -2,9 +2,7 @@ import sqlite3 from 'sqlite3';
 import fs from 'fs';
 import path from 'path';
 
-const database_directory = path.join('..','shared-db');
-const database_file = path.join(database_directory, 'database.sqlite');
-const database_init_script_file = path.join(database_directory, 'init.sql');
+
 
 /**
  * Attempts to open an existing database or create a new one if it doesn't exist.
@@ -13,6 +11,10 @@ const database_init_script_file = path.join(database_directory, 'init.sql');
  *                          or rejects if an error occurs during the process.
  */
 export function openDatabase() {
+    const database_directory = path.join('','shared-db');
+    const database_file = path.join(database_directory, 'database.sqlite');
+    const database_init_script_file = path.join(database_directory, 'init.sql');
+
     return new Promise((resolve, reject) => {
         let initSql;
         try {

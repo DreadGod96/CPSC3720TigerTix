@@ -1,7 +1,14 @@
 import sqlite3 from 'sqlite3';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
-// Path to database
-const database_path = '../shared-db/database.sqlite';
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const isTestEnv = process.env.NODE_ENV === 'test';
+const dbName = isTestEnv ? 'test-database.sqlite' : 'database.sqlite';
+const database_path = path.join(__dirname, '..', '..', 'shared-db', dbName);
+
 const sqlite_3 = sqlite3.verbose();
 
 const database = new sqlite_3.Database(database_path, sqlite3.OPEN_READWRITE, (error) => {

@@ -33,19 +33,25 @@ app.use((error, request, res, next) => {
     });
 });
 
-// Attempt to create database if it does not exist
-openDatabase()
-
-    // If database is created / verified to exist, continue
-    .then(() => {
-        app.listen(port, () => {
-            console.log(`Server running on port ${port}`);
-            console.log(`Test Event List: http://localhost:${port}/api/events`);
+const startServer = () => {
+    // Attempt to create database if it does not exist
+    openDatabase()
+        .then(() => {
+            app.listen(port, () => {
+                console.log(`Server running on port ${port}`);
+                console.log(`Test Event List: http://localhost:${port}/api/events`);
+            });
+        })
+        .catch((error) => {
+            console.error('Failed to initialize database:', error);
+            process.exit(1);
         });
-    })
+};
 
-    // Database failed to create, exit
-    .catch((error) => {
-        console.error('Failed to initialize database:', error);
-        process.exit(1);
-    });
+// Only start if not in test mode
+if (process.env.NODE_ENV !== 'test') {
+    startServer();
+}
+
+// Export for testing
+export default app;
