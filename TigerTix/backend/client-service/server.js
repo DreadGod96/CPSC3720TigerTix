@@ -5,19 +5,23 @@ import './models/clientModel.js';
 
 const app = express();
 
-//Declare client service port
+// Declare client service port
 const port = 6001;
 
-//Backend API 
+// Backend API 
 app.use(cors());
 app.use(express.json());
 
-//Routes
+// Routes
 app.use('/api/events', clientRoutes);
 
-//Start the server
-app.listen(port, () => {
-    console.log(`Client service running on http://localhost:${port}`);
-    console.log(`Test Event List: http://localhost:${port}/api/events`);
-});
+// Start the server if test is not set
+if (process.env.NODE_ENV !== 'test') {
+    app.listen(port, () => {
+        console.log(`Client service running on http://localhost:${port}`);
+        console.log(`Test Event List: http://localhost:${port}/api/events`);
+    });
+}
 
+// Export app for testing
+export default app;
