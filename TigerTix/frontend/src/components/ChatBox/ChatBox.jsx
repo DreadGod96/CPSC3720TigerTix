@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import './ChatBox.css';
 import { FaRobot, FaUser, FaPaperPlane } from 'react-icons/fa';
 import VoiceInput from '../VoiceInput/VoiceInput';
