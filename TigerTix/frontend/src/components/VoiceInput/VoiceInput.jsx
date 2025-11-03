@@ -2,11 +2,14 @@ import "./VoiceInput.css";
 import React, { useState, useEffect, useRef } from 'react';
 import { FaMicrophone } from 'react-icons/fa';
 
-//Ensure browser compatibility
+// Ensure browser compatibility
 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
-//Create beep sound with Web Audio API
 const playBeep = () => {
+    if (typeof window === 'undefined' || !(window.AudioContext || window.webkitAudioContext)) {
+        console.warn("AudioContext not supported.");
+        return;
+    }
     const audioContext = new (window.AudioContext || window.webkitAudioContext)();
     const oscillator = audioContext.createOscillator();
     oscillator.type = 'square';
@@ -16,22 +19,13 @@ const playBeep = () => {
     setTimeout(() => { oscillator.stop(); }, 200);
 };
 
-let recognition;
-if (SpeechRecognition){
-    recognition = new SpeechRecognition();
-    recognition.interimResults = false;
-    recognition.continuous = false;
-    recognition.lang = 'en-US';
-    recognition.maxAlternatives = 1;
-} else {
-    console.error("Web Speech API is not supported by this browser.");
-}
-
 const VoiceInput = ({ onSpeechResult }) => {
 
     const [isListening, setIsListening] = useState(false);
     const [transcript, setTranscript] = useState('');
     const [error, setError] = useState('');
+
+    const recognitionRef = useRef(null);
 
     const onSpeechResultRef = useRef(onSpeechResult);
     useEffect(() => {
@@ -39,10 +33,20 @@ const VoiceInput = ({ onSpeechResult }) => {
     }, [onSpeechResult]);
 
     useEffect(() => {
-        if (!recognition) {
+        if (!SpeechRecognition) {
             setError("Web Speech API is not supported by this browser.");
             return;
         }
+
+        if (!recognitionRef.current) {
+            recognitionRef.current = new SpeechRecognition();
+            recognitionRef.current.interimResults = false;
+            recognitionRef.current.continuous = false;
+            recognitionRef.current.lang = 'en-US';
+            recognitionRef.current.maxAlternatives = 1;
+        }
+
+        const recognition = recognitionRef.current;
 
         recognition.onstart = () => {
             setIsListening(true);
@@ -72,7 +76,6 @@ const VoiceInput = ({ onSpeechResult }) => {
             }
         };
 
-        // Cleanup function to remove event listeners
         return () => {
             recognition.onstart = null;
             recognition.onend = null;
@@ -80,11 +83,13 @@ const VoiceInput = ({ onSpeechResult }) => {
             recognition.onresult = null;
         };
 
-    }, []);
+    }, []); 
 
     const handleMicClick = () => {
-        if (!SpeechRecognition) {
-            setError("The browser does not support this operation.")
+        const recognition = recognitionRef.current;
+        
+        if (!recognition) {
+            setError("Speech recognition is not available or initialized.");
             return;
         }
 

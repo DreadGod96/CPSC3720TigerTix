@@ -32,11 +32,15 @@ global.window.AudioContext = jest.fn(() => ({
 describe('VoiceInput', () => {
     const mockOnSpeechResult = jest.fn();
 
+    const recognitionInstance = mockSpeechRecognition.mock.results[0]?.value;
+
     beforeEach(() => {
         mockOnSpeechResult.mockClear();
-        mockSpeechRecognition.mockClear();
-        const mockInstance = mockSpeechRecognition.mock.results[0]?.value;
-        if (mockInstance) Object.values(mockInstance).forEach(mockFn => mockFn.mockClear());
+
+        if (recognitionInstance) {
+            recognitionInstance.start.mockClear();
+            recognitionInstance.stop.mockClear();
+        }
     });
 
     test('renders the microphone button', () => {
@@ -49,14 +53,16 @@ describe('VoiceInput', () => {
         render(<VoiceInput onSpeechResult={mockOnSpeechResult} />);
         const micButton = screen.getByRole('button', { name: /start voice command/i });
         fireEvent.click(micButton);
-        const recognitionInstance = mockSpeechRecognition.mock.results[0].value;
+
+        expect(recognitionInstance).toBeDefined();
         expect(recognitionInstance.start).toHaveBeenCalledTimes(1);
     });
 
     test('displays transcript and calls onSpeechResult when recognition has a result', () => {
         render(<VoiceInput onSpeechResult={mockOnSpeechResult} />);
-        const recognitionInstance = mockSpeechRecognition.mock.results[0].value;
+
         expect(recognitionInstance).toBeDefined();
+        expect(recognitionInstance.onresult).toBeInstanceOf(Function);
 
         recognitionInstance.onresult({ results: [[{ transcript: 'hello world' }]] });
 
