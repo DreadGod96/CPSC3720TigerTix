@@ -61,7 +61,7 @@ function create(event_data) {
                     console.error("Error in Event.create:", error.message);
                     return reject(new Error('Failed to create the event in the database.'));
                 }
-                last_id = this.last_id;
+                last_id = this.lastID;
             });
 
             database.run("COMMIT;", (commit_error) =>{
