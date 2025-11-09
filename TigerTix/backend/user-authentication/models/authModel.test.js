@@ -29,11 +29,7 @@ describe('Authentication Model - authModel.js', () => {
     let Authenticate;
 
     beforeEach(async () => {
-        jest.resetModules();
 
-        const authenticateModule = await import('../models/authModel.js');
-        Authenticate = authenticateModule.default;
-        
         // Create new db
         if (fs.existsSync(TEST_DATABASE_PATH)) {
             fs.unlinkSync(TEST_DATABASE_PATH);
@@ -51,7 +47,12 @@ describe('Authentication Model - authModel.js', () => {
                 });
             });
         });
+
+        jest.resetModules();
+        const authenticateModule = await import('../models/authModel.js');
+        Authenticate = authenticateModule.default;
     });
+
 
     afterEach(async () => {
         // close db connection
