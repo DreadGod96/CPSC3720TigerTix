@@ -43,7 +43,7 @@ const findUser = (email) => {
  * @param {string} password The new user's already hashed password
  * @returns {Promise<{id: number, email: string}>} A promise that resolves with the new user's id and email 
  */
-const createUser = (email, password) => {
+const createUser = (userData) => {
     const { email, password } = userData;
 
     return new Promise((resolve, reject) => {
