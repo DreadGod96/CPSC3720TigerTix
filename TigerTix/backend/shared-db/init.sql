@@ -8,6 +8,6 @@ CREATE TABLE IF NOT EXISTS events (
 
 CREATE TABLE IF NOT EXISTS users (
     user_id INTEGER PRIMARY KEY,
-    email varchar(255), NOT NULL UNIQUE
+    email varchar(255) NOT NULL UNIQUE,
     password TEXT NOT NULL
 )
