@@ -1,9 +1,9 @@
 import express from "express";
-const router = express.Router();
-
 import{
     getChatbotResponse
 } from "../controllers/llmController.js";
+
+const router = express.Router();
 
 router.post("/", getChatbotResponse);
 
