@@ -59,11 +59,11 @@ function close() {
     });
 }
 
-const Authentication = {
+const Event = {
     findUser,
     createUser,
     close, 
 };
 
-export default Authentication;
+export default Event;
 
