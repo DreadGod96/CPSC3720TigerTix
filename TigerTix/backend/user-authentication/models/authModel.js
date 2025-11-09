@@ -22,12 +22,12 @@ const database = new sqlite_3.Database(DATABASE_PATH, sqlite3.OPEN_READWRITE, (e
  * @returns {Promise<object|undefined>} A promise that resolves with the user row if found by the query,
  * or 'undefined' if no row is found that matches the query. Rejects with an error. 
  */
-export const findUser = (email) => {
+const findUser = (email) => {
     return new Promise((resolve, reject) => {
         const sql_cmd = `SELECT * FROM users WHERE email = ?`
 
-        database.get(sql_cmd, [email], (error,row) => {
-            if (error) reject(error);
+        database.get(sql_cmd, [email], (err,row) => {
+            if (err) reject(err);
             else resolve(rows);
         });
     });
@@ -39,7 +39,31 @@ export const findUser = (email) => {
  * @param {string} password The new user's already hashed password
  * @returns {Promise<{id: number, email: string}>} A promise that resolves with the new user's id and email 
  */
-export const createUser = (email, password) => {
+const createUser = (email, password) => {
     
 };
+
+/**
+ * Closes the database connection. Used for testing
+ * @returns {Promise<void>}
+ */
+function close() {
+    return new Promise((resolve, reject) => {
+        database.close((err) => {
+            if (err) {
+                console.error('Failed to close authentication model DB:', err.message);
+                return reject(err);
+            }
+            resolve();
+        });
+    });
+}
+
+const Authentication = {
+    findUser,
+    createUser,
+    close, 
+};
+
+export default Authentication;
 
