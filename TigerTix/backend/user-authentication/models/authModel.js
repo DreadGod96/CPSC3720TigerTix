@@ -1,6 +1,7 @@
 import sqlite3 from "sqlite3";
-import path from 'path';
+import path, { resolve } from 'path';
 import { fileURLToPath } from 'url';
+import { registerHooks } from "module";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -27,8 +28,11 @@ const findUser = (email) => {
         const sql_cmd = `SELECT * FROM users WHERE email = ?`
 
         database.get(sql_cmd, [email], (err,row) => {
-            if (err) reject(err);
-            else resolve(rows);
+            if (err) {
+                console.error("Database error in findUser:", err.message);
+                reject(err);
+            }
+            resolve(row);
         });
     });
 };
@@ -40,7 +44,19 @@ const findUser = (email) => {
  * @returns {Promise<{id: number, email: string}>} A promise that resolves with the new user's id and email 
  */
 const createUser = (email, password) => {
-    
+    const { email, password } = userData;
+
+    return new Promise((resolve, reject) => {
+        const sql_cmd = `INSERT INTO users (email, password) VALUES (?, ?)`;
+        
+        database.run(sql_cmd, [email, password], function (err) {
+            if (err) {
+                console.error("Database error in createUser:", err.message);
+                reject(err);
+            }
+            resolve({ id: this.lastID, email});
+        });
+    });
 };
 
 /**
@@ -59,11 +75,11 @@ function close() {
     });
 }
 
-const Event = {
+const Authenticate = {
     findUser,
     createUser,
     close, 
 };
 
-export default Event;
+export default Authenticate;
 
