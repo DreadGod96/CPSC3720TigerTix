@@ -15,7 +15,7 @@ jest.unstable_mockModule('../services/queueService.js', () => ({
     }
 }));
 
-jest.unstable_mockModule('../services/authModel.js', () => ({
+jest.unstable_mockModule('../models/authModel.js', () => ({
     default: {
         findUser: mockFindUser,
         createUser: mockCreateUser,
@@ -63,7 +63,7 @@ describe('Authentication Controller - Unit Tests', () => {
             mockBcryptHash.mockResolvedValue(mockHashedPassword);
             mockCreateUser.mockResolvedValue({ id: 1, email: mockEmail });
 
-            const response = (await request(app).post('/api/auth/register')).send({ email: mockEmail, password: mockPassword });
+            const response = await request(app).post('/api/auth/register').send({ email: mockEmail, password: mockPassword });
 
             expect(response.statusCode).toBe(201);
             expect(response.body.success).toBe(true);
@@ -71,7 +71,7 @@ describe('Authentication Controller - Unit Tests', () => {
 
             expect(mockAddToQueue).toHaveBeenCalledTimes(2);
             expect(mockFindUser).toHaveBeenCalledWith(mockEmail);
-            expect(mockBcryptHash).toHaveBeenCalledWith({ email: mockEmail, password: mockHashedPassword });
+            expect(mockBcryptHash).toHaveBeenCalledWith(mockPassword, 10);
         });
 
         it('should return a 409 status code if email is already in use', async () => {
