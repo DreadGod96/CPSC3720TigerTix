@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import AuthModel from "../models/authModel.js";
 import queueService from "../services/queueService.js";
 import bcrypt from 'bcryptjs';
@@ -8,6 +9,7 @@ const JWT_SECRET = process.env.JWT_SECRET;
 export const registerUser = async (req, res) => {
     try {
         const { email, password } = req.body;
+        
         //validate that email and password are entered
         if (!email || !password) {
             return res.status(400).json({
@@ -53,7 +55,7 @@ export const registerUser = async (req, res) => {
 
 export const loginUser = async (req, res) => {
     try {
-        const {email, password } = req.body;
+        const {email, password} = req.body;
 
         //validate that email and password are entered
         if (!email || !password) {
@@ -67,7 +69,7 @@ export const loginUser = async (req, res) => {
         const findUserTask = () => AuthModel.findUser(email);
         const existingUser = await queueService.addToQueue(findUserTask);
 
-        if (!user) {
+        if (!existingUser) {
             return res.status(401).json({
                 success: false,
                 message: 'Invalid credentials'
@@ -75,8 +77,8 @@ export const loginUser = async (req, res) => {
         }
 
         //compare provided password with stored hashed password
-        const matchingPass = await bcrypt.compare(password, user.password);
-        if (!isMatch) {
+        const matchingPass = await bcrypt.compare(password, existingUser.password);
+        if (!matchingPass) {
             return res.status(401).json({
                 success: false,
                 message: 'Invalid credentials'
@@ -84,7 +86,7 @@ export const loginUser = async (req, res) => {
         }
 
         //Create JWT and assign to a user
-        const token = jwt.sign({ userId: user.user_id, email: user.email },
+        const token = jwt.sign({ userId: existingUser.id, email: existingUser.email },
             JWT_SECRET, { expiresIn: '30m' }
         );
 

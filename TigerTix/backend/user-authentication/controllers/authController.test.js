@@ -63,7 +63,9 @@ describe('Authentication Controller - Unit Tests', () => {
             mockBcryptHash.mockResolvedValue(mockHashedPassword);
             mockCreateUser.mockResolvedValue({ id: 1, email: mockEmail });
 
-            const response = await request(app).post('/api/auth/register').send({ email: mockEmail, password: mockPassword });
+            const response = await request(app)
+                .post('/api/auth/register')
+                .send({ email: mockEmail, password: mockPassword });
 
             expect(response.statusCode).toBe(201);
             expect(response.body.success).toBe(true);
@@ -78,7 +80,9 @@ describe('Authentication Controller - Unit Tests', () => {
             const mockEmail = 'testRegister@clemson.edu';
             mockFindUser.mockResolvedValue({ id: 1, email: mockEmail });
 
-            const response = (await request(app).post('/api/auth/register')).send({ email: mockEmail, password: 'abc123ABC!@#' });
+            const response = await request(app)
+                .post('/api/auth/register')
+                .send({ email: mockEmail, password: 'abc123ABC!@#' });
 
             expect(response.statusCode).toBe(409);
             expect(response.body.success).toBe(false);
@@ -107,7 +111,9 @@ describe('Authentication Controller - Unit Tests', () => {
             mockFindUser.mockResolvedValue(mockUser);
             mockBcryptCompare.mockResolvedValue(true);
 
-            const response = (await request(app).post('/api/auth/login')).send({ email: mockUser.email, password: mockPassword });
+            const response = await request(app)
+                .post('/api/auth/login')
+                .send({ email: mockUser.email, password: mockPassword });
 
             expect(response.statusCode).toBe(200);
             expect(response.body.success).toBe(true);
@@ -127,7 +133,9 @@ describe('Authentication Controller - Unit Tests', () => {
             mockFindUser.mockResolvedValue(mockUser);
             mockBcryptCompare.mockResolvedValue(false);
 
-            const response = (await request(app).post('/api/auth/login')).send({ email: mockUser.email, password: mockPassword });
+            const response = await request(app)
+                .post('/api/auth/login')
+                .send({ email: mockUser.email, password: mockPassword });
 
             expect(response.statusCode).toBe(401);
             expect(response.body.success).toBe(false);
@@ -137,7 +145,9 @@ describe('Authentication Controller - Unit Tests', () => {
         it('should return a 401 status code for an invalid user', async () => {
             mockFindUser.mockResolvedValue(undefined);
 
-            const response = (await request(app).post('/api/auth/login')).send({ email: 'nonexistent@clemson.edu', password: 'notReal123!@#' });
+            const response = await request(app)
+                .post('/api/auth/login')
+                .send({ email: 'nonexistent@clemson.edu', password: 'notReal123!@#' });
 
             expect(response.statusCode).toBe(401);
             expect(response.body.success).toBe(false);
