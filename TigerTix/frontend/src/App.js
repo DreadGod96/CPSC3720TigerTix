@@ -1,11 +1,11 @@
 
 import React, { useEffect, useState, useCallback } from 'react';
+import { BrowserRouter as Router, Routes, Route, Link, useNavigate, Navigate, Outlet } from 'react-router-dom';
 import './App.css';
 
 //Import components
 import HomeScreenHeading from './components/HomeScreenHeading/HomeScreenHeading';
 import EventList from './components/EventList/EventList';
-import VoiceInput from './components/VoiceInput/VoiceInput';
 import ChatBox from './components/ChatBox/ChatBox.jsx';
 import BookingConfirmationModal from './components/BookingConfirmationModal/BookingConfirmationModal.jsx';
 
@@ -22,13 +22,121 @@ const speak = (text) => {
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = 'en-US';
 
-
     window.speechSynthesis.cancel();
     window.speechSynthesis.speak(utterance);
 };
 
 
-function App() {
+
+function LoginPage({ onLogin }) {
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [error, setError] = useState('');
+    const navigate = useNavigate();
+
+    const handleLogin = async (e) => {
+        e.preventDefault();
+        setError('');
+
+        try {
+            const response = await fetch('http://localhost:8001/api/auth/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password }),
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.message || 'Failed to log in.');
+            }
+
+            // store token and update state
+            onLogin({ email, password, token: data.token });
+            navigate('/');
+        } catch (err) {
+            setError(err.message);
+        }
+    };
+
+    return (
+        <div className="auth-container">
+            <h2>Login to TigerTix</h2>
+            <form onSubmit={handleLogin}>
+                <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+                <input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+                <button type="submit">Log In</button>
+            </form>
+            {error && <p className="error-message">{error}</p>}
+            <p>
+                Don't have an account? <Link to="/register">Register here</Link>
+            </p>
+        </div>
+    );
+}
+
+
+function RegisterPage({ onRegister }) {
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [error, setError] = useState('');
+    const navigate = useNavigate();
+
+    const handleRegister = async (e) => {
+        e.preventDefault();
+        setError('');
+
+        try {
+            const response = await fetch('http://localhost:8001/api/auth/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password }),
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.message || 'Failed to register.');
+            }
+
+            // successful registration, move to login
+            navigate('/login');
+
+        } catch (err) {
+            setError(err.message);
+        }
+    };
+
+    return (
+        <div className="auth-container">
+            <h2>Create an Account</h2>
+            <form onSubmit={handleRegister}>
+                <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+                <input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+                <button type="submit">Register</button>
+            </form>
+            {error && <p className="error-message">{error}</p>}
+            <p>
+                Already have an account? <Link to="/login">Login here</Link>
+            </p>
+        </div>
+    );
+}
+
+
+
+
+function ProtectedRoute({ isAuthenticated }) {
+    if (!isAuthenticated) {
+        return <Navigate to="/login" replace />;
+    }
+    return <Outlet />;
+}
+
+
+
+
+function MainPage({ onLogout, token, credentials }) {
     const [events, setEvents] = useState([]);
 
     const [statusMessage, setStatusMessage] = useState('');
@@ -60,7 +168,8 @@ function App() {
             const response = await fetch(`http://localhost:6001/api/events/${eventID}/purchase`, {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    // 'Authorization': `Bearer ${token}`
                 },
                 body: JSON.stringify({
                     ticket_count: ticket_count
@@ -166,13 +275,17 @@ function App() {
             setIsChatLoading(false);
         }
     }, []);
-    
+
     return (
         <div className="App">
             <HomeScreenHeading
                 title={app_title}
                 logo={CLEMSON_LOGO}
             />
+            <div className="header-actions">
+                <button onClick={onLogout} className="logout-button">Logout</button>
+                <p className="logged-in-user">Logged in as {credentials?.email}</p>
+            </div>
             <div className="sr-only" aria-live="polite" role="status">
                 {statusMessage}
             </div>
@@ -194,5 +307,80 @@ function App() {
             />
         </div>
     );
+};
+
+
+function App() {
+    
+    // state for user auth
+    const [authToken, setAuthToken] = useState(null);
+    const [credentials, setCredentials] = useState(null);
+    const isAuthenticated = !!authToken;
+
+    // token refresh timer
+    useEffect(() => {
+        let refreshTimeout;
+
+        const refreshToken = async () => {
+            if (!credentials) return;
+
+            try {
+
+                const response = await fetch('http://localhost:8001/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: credentials.email, password: credentials.password }),
+                });
+                const data = await response.json();
+
+                if (response.ok) {
+
+                    // new token is set, effect will run again
+                    setAuthToken(data.token); 
+                } else {
+
+                    // If refresh fails, log out
+                    handleLogout(); 
+                }
+
+            } catch (error) {
+                console.error("Failed to refresh token:", error);
+                handleLogout();
+            }
+        };
+
+        if (authToken) {
+            // Token expires in 30 mins (1800000 ms). Refresh 1 minute before.
+            const REFRESH_INTERVAL = 29 * 60 * 1000; // 29 minutes
+            refreshTimeout = setTimeout(refreshToken, REFRESH_INTERVAL);
+        }
+
+        // Cleanup function to clear the timer
+        return () => clearTimeout(refreshTimeout);
+
+    }, [authToken, credentials]); // Rerun when token or credentials change
+
+    const handleLogin = ({ email, password, token }) => {
+        setCredentials({ email, password });
+        setAuthToken(token);
+    };
+
+    const handleLogout = () => {
+        setAuthToken(null);
+        setCredentials(null);
+    };
+
+    return (
+        <Router>
+            <Routes>
+                <Route path="/login" element={<LoginPage onLogin={handleLogin} />} />
+                <Route path="/register" element={<RegisterPage />} />
+                <Route element={<ProtectedRoute isAuthenticated={isAuthenticated} />}>
+                    <Route path="/" element={<MainPage onLogout={handleLogout} token={authToken} credentials={credentials} />} />
+                </Route>
+            </Routes>
+        </Router>
+    );
 }
+
 export default App;
