@@ -1,3 +1,5 @@
+import dotenv from 'dotenv';
+dotenv.config();
 import express from 'express';
 import cors from 'cors';
 import clientRoutes from './routes/clientRoutes.js';
@@ -6,7 +8,7 @@ import './models/clientModel.js';
 const app = express();
 
 // Declare client service port
-const port = 6001;
+const port = process.env.CLIENT_SERVICE_PORT || 6001;
 
 // Backend API 
 app.use(cors());

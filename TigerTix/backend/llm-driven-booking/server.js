@@ -1,10 +1,12 @@
+import dotenv from 'dotenv';
+dotenv.config();
 import express from 'express';
 import cors from 'cors';
 import llmRoutes from './routes/llmRoutes.js';
 import './models/llmModel.js';
 
 const app = express();
-const port = 7001;
+const port = process.env.LLM_SERVICE_PORT || 7001;
 
 // Backend API 
 app.use(cors());

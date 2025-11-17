@@ -5,7 +5,7 @@ import { openDatabase } from "./setup.js";
 
 // Define constants
 const app = express();
-const port = 5001;
+const port = process.env.ADMIN_SERVICE_PORT || 5001;
 
 // Setup middleware
 app.use(cors());

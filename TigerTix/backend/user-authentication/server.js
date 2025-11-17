@@ -7,7 +7,7 @@ import './models/authModel.js';
 
 
 const app = express();
-const port = 8001;
+const port = process.env.USER_AUTH_SERVICE_PORT || 8001;
 
 // Backend API 
 app.use(cors());
@@ -23,7 +23,7 @@ app.use('/api/auth', authRoutes);
 // Start the server if test is not set
 if (process.env.NODE_ENV !== 'test') {
     app.listen(port, () => {
-        console.log(`LLM service running on http://localhost:${port}`);
+        console.log(`User Auth service running on http://localhost:${port}`);
     });
 }
 
