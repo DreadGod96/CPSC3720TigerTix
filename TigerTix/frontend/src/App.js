@@ -1,6 +1,6 @@
 
 import React, { useEffect, useState } from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route } from 'react-router';
 import './App.css';
 
 // Import pages from the new routes directory
