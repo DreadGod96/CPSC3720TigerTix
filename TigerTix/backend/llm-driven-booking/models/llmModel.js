@@ -5,12 +5,12 @@ import path from 'path';
 
 const CLIENT_SERVICE_URL = 'http://localhost:6001/api/events';
 
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+const LLM_API_KEY = process.env.LLM_API_KEY;
 const GEMINI_MODEL = 'gemini-2.0-flash-001';
-if (!GEMINI_API_KEY) {
-    throw new Error("GEMINI_API_KEY is not defined in .env");
+if (!LLM_API_KEY) {
+    throw new Error("LLM_API_KEY is not defined in .env");
 }
-const ai = new GoogleGenAI({GEMINI_API_KEY});
+const ai = new GoogleGenAI({LLM_API_KEY});
 
 
 const SAFETY_SETTINGS = [
