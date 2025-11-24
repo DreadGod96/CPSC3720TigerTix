@@ -119,6 +119,7 @@ npm run test:e2e
 
 ## Team Members
 | Name                | Role               |
+| ------------------- | ------------------ |
 | Caden Allen         | Technical Lead     |
 | Roman Pasqualone    | Fullstack Engineer |
 | Eli Monroe          | Fullstack Engineer |
