@@ -3,7 +3,7 @@ import { GoogleGenAI, HarmCategory, HarmBlockThreshold } from '@google/genai';
 import fs from 'node:fs/promises';
 import path from 'path'; 
 
-const CLIENT_SERVICE_URL = 'http://localhost:6001/api/events';
+const CLIENT_SERVICE_URL = process.env.CLIENT_SERVICE_URL;
 
 const LLM_API_KEY = process.env.LLM_API_KEY;
 const GEMINI_MODEL = 'gemini-2.0-flash-001';
