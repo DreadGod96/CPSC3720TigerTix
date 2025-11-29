@@ -38,7 +38,8 @@ export default function MainPage({ onLogout, token, credentials }) {
 
     // Attempt to fetch events from client service
     const fetchEvents = () => {
-        fetch('http://localhost:6001/api/events')
+        const CLIENT_URL = process.env.CLIENT_API_URL;
+        fetch(`${CLIENT_URL}/api/events`)
             .then((response) => response.json())
             .then((data) => setEvents(data))
             .catch((error) => console.error(error));
@@ -51,7 +52,8 @@ export default function MainPage({ onLogout, token, credentials }) {
     // Attempt to buy ticket from given event
     const buyTicket = async (eventName, eventID, ticket_count = 1) => {
         try {
-            const response = await fetch(`http://localhost:6001/api/events/${eventID}/purchase`, {
+            const CLIENT_URL = process.env.CLIENT_API_URL;
+            const response = await fetch(`${CLIENT_URL}api/events/${eventID}/purchase`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -115,8 +117,9 @@ export default function MainPage({ onLogout, token, credentials }) {
                 role: msg.sender === 'bot' ? 'model' : 'user',
                 parts: [{ text: msg.text }]
             }));
-
-            const response = await fetch('http://localhost:7001/api/llm/parse', {
+            
+            const LLM_URL = process.env.LLM_API_URL;
+            const response = await fetch(`${LLM_URL}/api/llm/parse`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ user_input: message, chat_history: currentChatHistory }),

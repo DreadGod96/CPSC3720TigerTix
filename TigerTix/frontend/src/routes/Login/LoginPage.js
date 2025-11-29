@@ -12,7 +12,8 @@ export default function LoginPage({ onLogin }) {
         setError('');
 
         try {
-            const response = await fetch('http://localhost:8001/api/auth/login', {
+            const AUTH_URL = process.env.AUTH_API_URL;
+            const response = await fetch(`${AUTH_URL}/api/auth/login`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email, password }),
