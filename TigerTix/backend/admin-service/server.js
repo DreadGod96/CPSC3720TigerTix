@@ -8,12 +8,23 @@ const app = express();
 const port = process.env.ADMIN_SERVICE_PORT || 5001;
 
 // Setup middleware
-app.use(cors());
+app.use(cors({
+    origin: [
+        "http://localhost:3000",
+        "https://tigertixfrontend.vercel.app"
+    ],
+    credentials: true,
+    methods:['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Setup routes
 app.use("/api/events", adminRoutes);
+
+// Health Check for Render
+app.get('/', (req, res) => res.status(200).send('Client Service Running'));
 
 // Setup error handling for routes that do not exist
 app.use((request, res, next) => {

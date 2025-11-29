@@ -11,11 +11,23 @@ const app = express();
 const port = process.env.CLIENT_SERVICE_PORT || 6001;
 
 // Backend API 
-app.use(cors());
+app.use(cors({
+    origin: [
+        "http://localhost:3000",
+        "https://tigertixfrontend.vercel.app"
+    ],
+    credentials: true,
+    methods:['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+}));
+
 app.use(express.json());
 
 // Routes
 app.use('/api/events', clientRoutes);
+
+// Health Check for Render
+app.get('/', (req, res) => res.status(200).send('Client Service Running'));
 
 // Start the server if test is not set
 if (process.env.NODE_ENV !== 'test') {
