@@ -38,7 +38,7 @@ export default function MainPage({ onLogout, token, credentials }) {
 
     // Attempt to fetch events from client service
     const fetchEvents = () => {
-        const CLIENT_URL = process.env.CLIENT_API_URL;
+        const CLIENT_URL = process.env.REACT_APP_CLIENT_API_URL;
         fetch(`${CLIENT_URL}/api/events`)
             .then((response) => response.json())
             .then((data) => setEvents(data))
@@ -52,7 +52,7 @@ export default function MainPage({ onLogout, token, credentials }) {
     // Attempt to buy ticket from given event
     const buyTicket = async (eventName, eventID, ticket_count = 1) => {
         try {
-            const CLIENT_URL = process.env.CLIENT_API_URL;
+            const CLIENT_URL = process.env.REACT_APP_CLIENT_API_URL;
             const response = await fetch(`${CLIENT_URL}api/events/${eventID}/purchase`, {
                 method: 'POST',
                 headers: {
@@ -118,7 +118,7 @@ export default function MainPage({ onLogout, token, credentials }) {
                 parts: [{ text: msg.text }]
             }));
             
-            const LLM_URL = process.env.LLM_API_URL;
+            const LLM_URL = process.env.REACT_APP_LLM_API_URL;
             const response = await fetch(`${LLM_URL}/api/llm/parse`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },

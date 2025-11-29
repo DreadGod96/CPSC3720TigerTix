@@ -12,7 +12,7 @@ export default function RegisterPage() {
         setError('');
 
         try {
-            const AUTH_URL = process.env.AUTH_API_URL;
+            const AUTH_URL = process.env.REACT_APP_AUTH_API_URL;
             const response = await fetch(`${AUTH_URL}/api/auth/login`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
