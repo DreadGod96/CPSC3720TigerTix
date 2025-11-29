@@ -12,7 +12,8 @@ const port = process.env.LLM_SERVICE_PORT || 7001;
 app.use(cors({
     origin: [
         "http://localhost:3000",
-        "https://tigertixfrontend.vercel.app"
+        "https://tigertixfrontend.vercel.app",
+        "https://tigertixfrontend-2eaq3b9np-elis-projects-195b117e.vercel.app"
     ],
     credentials: true,
     methods:['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
