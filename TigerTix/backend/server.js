@@ -32,6 +32,10 @@ app.get('/', (req,res) => {
 });
 
 //start server
-app.listen(PORT, () => {
-    console.log(`backend server is running on port ${PORT}`);
-});
+if (process.env.NODE.ENV != 'test') {
+    app.listen(PORT, () => {
+        console.log(`backend server is running on port ${PORT}`);
+    });
+}
+
+export default app;
