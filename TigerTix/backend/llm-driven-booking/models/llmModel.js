@@ -193,13 +193,16 @@ export async function manageConversation(user_input, conversation_history = []) 
         const today = new Date().toISOString().slice(0, 10);
         
         const promptPath = path.resolve('prompt.txt');
+        let system_prompt_template;
         try {
-            const system_prompt_template = await fs.readFile(promptPath, 'utf-8');
+            system_prompt_template = await fs.readFile(promptPath, 'utf-8');
         }
         catch (error) {
             console.error(`Error: Could not find prompt.txt at ${promptPath}`);
-            const system_prompt = system_prompt_template.replace('{{current_date}}', today);
+            const system_prompt_template = "You are a helpful assistant for TigerTix. Today is {{current_date}}.";
         }
+        const system_prompt = system_prompt_template.replace('{{current_date}}', today);
+
 
         const chat = ai.chats.create({
             model: GEMINI_MODEL,
