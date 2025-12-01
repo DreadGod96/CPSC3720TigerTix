@@ -1,12 +1,9 @@
 import sqlite3 from 'sqlite3';
 import path from 'path';
-import { fileURLToPath } from 'url';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 const IS_TEST_ENV = process.env.NODE_ENV === 'test';
 const DATABASE_NAME = IS_TEST_ENV ? 'test-database.sqlite' : 'database.sqlite';
-const DATABASE_PATH = path.join(__dirname, '..', '..', 'shared-db', DATABASE_NAME);
+const DATABASE_PATH = path.resolve('shared-db', DATABASE_NAME);
 
 const sqlite_3 = sqlite3.verbose();
 

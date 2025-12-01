@@ -3,14 +3,14 @@ import { GoogleGenAI, HarmCategory, HarmBlockThreshold } from '@google/genai';
 import fs from 'node:fs/promises';
 import path from 'path'; 
 
-const CLIENT_SERVICE_URL = 'http://localhost:6001/api/events';
+const CLIENT_SERVICE_URL = process.env.CLIENT_SERVICE_URL || 'http://localhost:10000/api/events';
 
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+const LLM_API_KEY = process.env.LLM_API_KEY;
 const GEMINI_MODEL = 'gemini-2.0-flash-001';
-if (!GEMINI_API_KEY) {
-    throw new Error("GEMINI_API_KEY is not defined in .env");
+if (!LLM_API_KEY) {
+    throw new Error("LLM_API_KEY is not defined in .env");
 }
-const ai = new GoogleGenAI({GEMINI_API_KEY});
+const ai = new GoogleGenAI({ apiKey: LLM_API_KEY});
 
 
 const SAFETY_SETTINGS = [
@@ -192,8 +192,17 @@ export async function manageConversation(user_input, conversation_history = []) 
         const cleaned_input = await cleanInput(user_input);
         const today = new Date().toISOString().slice(0, 10);
         
-        const system_prompt_template = await fs.readFile(path.join('.', 'prompt.txt'), 'utf-8');
+        const promptPath = path.resolve('prompt.txt');
+        let system_prompt_template;
+        try {
+            system_prompt_template = await fs.readFile(promptPath, 'utf-8');
+        }
+        catch (error) {
+            console.error(`Error: Could not find prompt.txt at ${promptPath}`);
+            const system_prompt_template = "You are a helpful assistant for TigerTix. Today is {{current_date}}.";
+        }
         const system_prompt = system_prompt_template.replace('{{current_date}}', today);
+
 
         const chat = ai.chats.create({
             model: GEMINI_MODEL,

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router';
 
 export default function LoginPage({ onLogin }) {
     const [email, setEmail] = useState('');
@@ -12,7 +12,8 @@ export default function LoginPage({ onLogin }) {
         setError('');
 
         try {
-            const response = await fetch('http://localhost:8001/api/auth/login', {
+            const AUTH_URL = process.env.REACT_APP_AUTH_API_URL;
+            const response = await fetch(`${AUTH_URL}/api/auth/login`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email, password }),

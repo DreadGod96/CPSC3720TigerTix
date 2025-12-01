@@ -36,7 +36,7 @@ describe('Authentication Controller - Unit Tests', () => {
 
     beforeEach(async () => {
         // Dynamically import modules
-        const appModule = await import('../server.js');
+        const appModule = await import('../../server.js');
         app = appModule.default;
         
         const queueModule = await import('../services/queueService.js');
