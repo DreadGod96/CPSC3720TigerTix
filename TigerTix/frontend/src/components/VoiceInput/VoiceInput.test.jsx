@@ -3,46 +3,45 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import VoiceInput from './VoiceInput.jsx';
 
-// 1. Create a global "Singleton" object for the mock.
-// This ensures 'recognitionInstance' is NEVER undefined.
+// --- GLOBAL MOCK SETUP ---
+
+// 1. Create the Mock Instance
 const recognitionInstance = {
     start: jest.fn(),
     stop: jest.fn(),
     abort: jest.fn(),
     onstart: null,
     onend: null,
-    onresult: null, // Component will overwrite this
+    onresult: null,
     onerror: null,
 };
 
-// 2. Create the Mock Constructor that returns our Singleton
+// 2. Define the Constructor
 const MockSpeechRecognition = jest.fn(() => recognitionInstance);
 
-// 3. Attach to the global window object (safely)
+// 3. Force it onto the window object immediately
 Object.defineProperty(window, 'SpeechRecognition', {
     writable: true,
     value: MockSpeechRecognition,
 });
-
 Object.defineProperty(window, 'webkitSpeechRecognition', {
     writable: true,
     value: MockSpeechRecognition,
 });
 
-// 4. Mock AudioContext
-Object.defineProperty(window, 'AudioContext', {
-    writable: true,
-    value: jest.fn(() => ({
-        createOscillator: () => ({
-            connect: jest.fn(),
-            start: jest.fn(),
-            stop: jest.fn(),
-            type: '',
-            frequency: { setValueAtTime: jest.fn() },
-        }),
-        currentTime: 0,
-    })),
-});
+// 4. Mock AudioContext (Simple version)
+window.AudioContext = jest.fn().mockImplementation(() => ({
+    createOscillator: () => ({
+        connect: jest.fn(),
+        start: jest.fn(),
+        stop: jest.fn(),
+        type: '',
+        frequency: { setValueAtTime: jest.fn() },
+    }),
+    currentTime: 0,
+}));
+
+// -------------------------
 
 describe('VoiceInput', () => {
     const mockOnSpeechResult = jest.fn();
@@ -50,7 +49,7 @@ describe('VoiceInput', () => {
     beforeEach(() => {
         jest.clearAllMocks();
         
-        // Reset the singleton's state before every test
+        // Reset the instance methods/properties for a clean slate
         recognitionInstance.start.mockClear();
         recognitionInstance.stop.mockClear();
         recognitionInstance.onresult = null; 
@@ -58,6 +57,11 @@ describe('VoiceInput', () => {
 
     test('renders the microphone button', () => {
         render(<VoiceInput onSpeechResult={mockOnSpeechResult} />);
+        
+        // Verify the error message is NOT present
+        const errorMsg = screen.queryByText(/Speech recognition is not available/i);
+        expect(errorMsg).not.toBeInTheDocument();
+
         const micButton = screen.getByRole('button', { name: /start voice command/i });
         expect(micButton).toBeInTheDocument();
     });
@@ -68,7 +72,6 @@ describe('VoiceInput', () => {
         
         fireEvent.click(micButton);
 
-        // Use waitFor to allow the component to process the click
         await waitFor(() => {
             expect(recognitionInstance.start).toHaveBeenCalledTimes(1);
         });
@@ -80,12 +83,13 @@ describe('VoiceInput', () => {
         const micButton = screen.getByRole('button', { name: /start voice command/i });
         fireEvent.click(micButton);
 
-        // Wait for the component to attach the 'onresult' listener
+        // Wait for the component to attach the listener
         await waitFor(() => {
-            expect(typeof recognitionInstance.onresult).toBe('function');
+            // We verify it's assigned (not null)
+            expect(recognitionInstance.onresult).not.toBeNull();
         });
 
-        // Manually trigger the result event
+        // Manually trigger the result
         recognitionInstance.onresult({ 
             results: [[{ transcript: 'hello world' }]] 
         });
