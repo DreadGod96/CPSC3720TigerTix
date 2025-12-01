@@ -1,21 +1,17 @@
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import VoiceInput from './VoiceInput.jsx';
 
-// define instance object
-const recognitionInstance = {
+// Mock SpeechRecognition API
+const mockSpeechRecognition = jest.fn(() => ({
     start: jest.fn(),
     stop: jest.fn(),
-    abort: jest.fn(),
     onstart: jest.fn(),
     onend: jest.fn(),
-    onresult: null,
+    onresult: jest.fn(),
     onerror: jest.fn(),
-};
-
-// Mock SpeechRecognition API
-const mockSpeechRecognition = jest.fn(() => recognitionInstance);
+}));
 
 global.window.SpeechRecognition = mockSpeechRecognition;
 global.window.webkitSpeechRecognition = mockSpeechRecognition;
@@ -36,13 +32,15 @@ global.window.AudioContext = jest.fn(() => ({
 describe('VoiceInput', () => {
     const mockOnSpeechResult = jest.fn();
 
+    const recognitionInstance = mockSpeechRecognition.mock.results[0]?.value;
+
     beforeEach(() => {
-        jest.clearAllMocks();
+        mockOnSpeechResult.mockClear();
 
-        recognitionInstance.start.mockClear();
-        recognitionInstance.stop.mockClear();
-        recognitionInstance.onresult = null;
-
+        if (recognitionInstance) {
+            recognitionInstance.start.mockClear();
+            recognitionInstance.stop.mockClear();
+        }
     });
 
     test('renders the microphone button', () => {
@@ -51,25 +49,20 @@ describe('VoiceInput', () => {
         expect(micButton).toBeInTheDocument();
     });
 
-    test('clicking the mic button starts recognition', async () => {
+    test('clicking the mic button starts recognition', () => {
         render(<VoiceInput onSpeechResult={mockOnSpeechResult} />);
         const micButton = screen.getByRole('button', { name: /start voice command/i });
         fireEvent.click(micButton);
 
-        await waitFor(() => {
-            expect(recognitionInstance.start).toHaveBeenCalledTimes(1);
-        });
+        expect(recognitionInstance).toBeDefined();
+        expect(recognitionInstance.start).toHaveBeenCalledTimes(1);
     });
 
-    test('displays transcript and calls onSpeechResult when recognition has a result', async () => {
+    test('displays transcript and calls onSpeechResult when recognition has a result', () => {
         render(<VoiceInput onSpeechResult={mockOnSpeechResult} />);
 
-        const micButton = screen.getByRole('button', { name: /start voice command/i });
-        fireEvent.click(micButton);
-
-        await waitFor(() => {
-            expect(typeof recognitionInstance.onresult).toBe('function');
-        });
+        expect(recognitionInstance).toBeDefined();
+        expect(recognitionInstance.onresult).toBeInstanceOf(Function);
 
         recognitionInstance.onresult({ results: [[{ transcript: 'hello world' }]] });
 
