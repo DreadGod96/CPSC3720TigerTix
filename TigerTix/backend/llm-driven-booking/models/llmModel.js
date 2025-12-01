@@ -10,7 +10,7 @@ const GEMINI_MODEL = 'gemini-2.0-flash-001';
 if (!LLM_API_KEY) {
     throw new Error("LLM_API_KEY is not defined in .env");
 }
-const ai = new GoogleGenAI({LLM_API_KEY});
+const ai = new GoogleGenAI({ apiKey: LLM_API_KEY});
 
 
 const SAFETY_SETTINGS = [
