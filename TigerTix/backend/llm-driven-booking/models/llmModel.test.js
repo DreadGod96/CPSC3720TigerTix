@@ -51,7 +51,7 @@ describe('llmModel.js', () => {
 
             // Check if fetch was called with the correct URL
             expect(mockFetch).toHaveBeenCalledWith(
-                new URL('http://localhost:6001/api/events?event_date=2025-11-05&event_name=Test')
+                new URL('http://localhost:10000/api/events?event_date=2025-11-05&event_name=Test')
             );
 
             expect(result).toBe(JSON.stringify({ events: mockEvents }));
