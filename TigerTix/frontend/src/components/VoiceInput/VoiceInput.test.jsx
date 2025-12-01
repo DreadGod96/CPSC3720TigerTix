@@ -3,15 +3,18 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import VoiceInput from './VoiceInput.jsx';
 
-// Mock SpeechRecognition API
-const mockSpeechRecognition = jest.fn(() => ({
+// define instance object
+const recognitionInstance = {
     start: jest.fn(),
     stop: jest.fn(),
     onstart: jest.fn(),
     onend: jest.fn(),
     onresult: jest.fn(),
     onerror: jest.fn(),
-}));
+};
+
+// Mock SpeechRecognition API
+const mockSpeechRecognition = jest.fn(() => recognitionInstance);
 
 global.window.SpeechRecognition = mockSpeechRecognition;
 global.window.webkitSpeechRecognition = mockSpeechRecognition;
@@ -31,8 +34,6 @@ global.window.AudioContext = jest.fn(() => ({
 
 describe('VoiceInput', () => {
     const mockOnSpeechResult = jest.fn();
-
-    const recognitionInstance = mockSpeechRecognition.mock.results[0]?.value;
 
     beforeEach(() => {
         mockOnSpeechResult.mockClear();
