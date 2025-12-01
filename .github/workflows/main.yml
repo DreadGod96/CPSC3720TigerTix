@@ -25,7 +25,7 @@ jobs:
         
         -   name: Run Frontend Tests
             run: |
-                cd frontend
+                cd TigerTix/frontend
                 npm test -- --watchAll=false --passWithNoTests
 
     #Test Backend
@@ -43,7 +43,7 @@ jobs:
 
         -   name: Install backend Dependencies
             run: |
-                cd backend
+                cd TigerTix/backend
                 npm install
     
         -   name: Run Backend Tests
