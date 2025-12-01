@@ -20,7 +20,7 @@ jobs:
 
         -   name: Install Frontend Dependencies
             run: |
-                cd frontend
+                cd TigerTix/frontend
                 npm install
         
         -   name: Run Frontend Tests
@@ -48,7 +48,7 @@ jobs:
     
         -   name: Run Backend Tests
             run: |
-                cd backend
+                cd TigerTix/backend
                 npm test
             env:
                 JWT_SECRET: "test_secret_value"
