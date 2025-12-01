@@ -53,7 +53,7 @@ jobs:
             env:
                 JWT_SECRET: "test_secret_value"
                 LLM_API_KEY: "test_api_key_value"
-                CLIENT_SERVICE_URL: "http://localhost:10000"
+                CLIENT_SERVICE_URL: "http://localhost:10000/api/events"
                 NODE_ENV: "test"
             
         -   name: Deploy Backend to Render
