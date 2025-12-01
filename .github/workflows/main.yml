@@ -30,7 +30,7 @@ jobs:
 
     #Test Backend
     backend-cicd:
-        needs: frontend-tests
+        #needs: frontend-tests
         runs-on: windows-latest  
         steps:
         -   name: Checkout Code
