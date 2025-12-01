@@ -12,12 +12,28 @@ import ProtectedRoute from './routes/ProtectedRoute';
 export const CLEMSON_LOGO = "/paw-orange.png";
 
 function App() {
+
     // state for user auth
-    const [authToken, setAuthToken] = useState(null);
-    const [credentials, setCredentials] = useState(null);
+    const [authToken, setAuthToken] = useState(() => localStorage.getItem('authToken'));
+    const [credentials, setCredentials] = useState(() => {
+        const savedCreds = localStorage.getItem('credentials');
+        return savedCreds ? JSON.parse(savedCreds) : null;
+    });
     const isAuthenticated = !!authToken;
 
-    // token refresh timer
+    // 
+    useEffect(() => {
+        if (authToken && credentials) {
+            localStorage.setItem('authToken', authToken);
+            localStorage.setItem('credentials', JSON.stringify(credentials));
+        } else {
+            localStorage.removeItem('authToken');
+            localStorage.removeItem('credentials');
+        }
+    }, [authToken, credentials]);
+
+
+    // token refresh timer and initial load from localStorage
     useEffect(() => {
         let refreshTimeout;
 
@@ -49,14 +65,15 @@ function App() {
 
         if (authToken) {
             // Token expires in 30 mins (1800000 ms). Refresh 1 minute before.
-            const REFRESH_INTERVAL = 29 * 60 * 1000; // 29 minutes
+            // Calculations below = 29 minutes
+            const REFRESH_INTERVAL = 29 * 60 * 1000;
             refreshTimeout = setTimeout(refreshToken, REFRESH_INTERVAL);
         }
 
         // Cleanup function to clear the timer
         return () => clearTimeout(refreshTimeout);
 
-    }, [authToken, credentials]); // Rerun when token or credentials change
+    }, [authToken, credentials]);
 
     const handleLogin = ({ email, password, token }) => {
         setCredentials({ email, password });
@@ -66,6 +83,8 @@ function App() {
     const handleLogout = () => {
         setAuthToken(null);
         setCredentials(null);
+        localStorage.removeItem('authToken');
+        localStorage.removeItem('credentials');
     };
 
     return (
