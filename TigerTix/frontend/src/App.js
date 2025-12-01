@@ -1,6 +1,6 @@
 
 import React, { useEffect, useState } from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route } from 'react-router';
 import './App.css';
 
 // Import pages from the new routes directory
@@ -41,7 +41,8 @@ function App() {
             if (!credentials) return;
 
             try {
-                const response = await fetch('http://localhost:8001/api/auth/login', {
+                const AUTH_URL = process.env.REACT_APP_AUTH_API_URL;
+                const response = await fetch(`${AUTH_URL}/api/auth/login`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ email: credentials.email, password: credentials.password }),

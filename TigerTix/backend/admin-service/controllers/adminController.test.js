@@ -22,10 +22,8 @@ jest.unstable_mockModule('../models/adminModel.js', () => ({
 }));
 
 // Setup database
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const TEST_DATABASE_PATH = path.join(__dirname, '..', '..', 'shared-db', 'test-database.sqlite');
-const INIT_SQL_PATH = path.join(__dirname, '..', '..', 'shared-db', 'init.sql');
+const TEST_DATABASE_PATH = path.resolve('shared-db', 'test-database.sqlite');
+const INIT_SQL_PATH = path.join('shared-db', 'init.sql');
 const INIT_SQL = fs.readFileSync(INIT_SQL_PATH, 'utf-8');
 let db;
 
@@ -37,7 +35,7 @@ describe('Admin Controller - /api/events', () => {
 
    beforeEach(async () => {
         // Dynamically import modules
-        const appModule = await import('../server.js');
+        const appModule = await import('../../server.js');
         app = appModule.default;
         
         const queueModule = await import('../services/queueService.js');

@@ -26,7 +26,7 @@ describe('Client Controller - Unit Tests', () => {
     let Event; 
 
     beforeEach(async () => {
-        const appModule = await import('../server.js');
+        const appModule = await import('../../server.js');
         app = appModule.default;
 
         const queueModule = await import('../services/queueService.js');

@@ -25,7 +25,7 @@ describe('LLM Controller - /api/llm/parse', () => {
 
     beforeEach(async () => {
         // Dynamically import modules
-        const appModule = await import('../server.js');
+        const appModule = await import('../../server.js');
         app = appModule.default;
 
         const queueModule = await import('../services/queueService.js');

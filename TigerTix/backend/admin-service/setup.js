@@ -1,8 +1,7 @@
 import sqlite3 from 'sqlite3';
 import fs from 'fs';
 import path from 'path';
-
-
+import { fileURLToPath } from 'url';
 
 /**
  * Attempts to open an existing database or create a new one if it doesn't exist.
@@ -11,16 +10,18 @@ import path from 'path';
  *                          or rejects if an error occurs during the process.
  */
 export function openDatabase() {
-    const database_directory = path.join('','shared-db');
-    const database_file = path.join(database_directory, 'database.sqlite');
-    const database_init_script_file = path.join(database_directory, 'init.sql');
+    const __filename = fileURLToPath(import.meta.url);
+    const __dirname = path.dirname(__filename);
+    const sharedDbPath = path.join(__dirname, '..', 'shared-db');
+    const database_file = path.join(sharedDbPath, 'database.sqlite');
+    const database_init_script_file = path.join(sharedDbPath, 'init.sql');
 
     return new Promise((resolve, reject) => {
         let initSql;
         try {
             initSql = fs.readFileSync(database_init_script_file, 'utf-8');
         } catch (error) {
-            console.error('DB SETUP ERROR: Could not read init.sql schema');
+            console.error(`DB SETUP ERROR: Could not read init.sql at ${database_init_script_file}`);
             return reject(error);
         }
  
