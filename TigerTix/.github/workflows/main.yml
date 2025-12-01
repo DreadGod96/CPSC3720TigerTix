@@ -1,0 +1,64 @@
+name: TigerTix CI/CD
+
+#Trigger pipeline on pushes to main
+on:
+    push:
+        branches: [ "main" ]
+
+    jobs:
+        #Test Frontend
+        frontend-tests:
+            runs-on: windows-latest  
+            steps:
+            -   name: Checkout Code
+                uses: actions/checkout@v3
+
+            -   name: Setup Node.js
+                uses: actions/setup-node@v3
+                with:
+                    node-version: '18'
+
+            -   name: Install Frontend Dependencies
+                run: |
+                    cd frontend
+                    npm install
+            
+            -   name: Run Frontend Tests
+                run: |
+                    cd frontend
+                    npm test -- --watchAll=false --passWithNoTests
+
+        #Test Backend
+        backend-cicd:
+            needs: frontend-tests
+            runs-on: windows-latest  
+            steps:
+            -   name: Checkout Code
+                uses: actions/checkout@v3
+
+            -   name: Setup Node.js
+                uses: actions/setup-node@v3
+                with:
+                    node-version: '18'
+
+            -   name: Install backend Dependencies
+                run: |
+                    cd backend
+                    npm install
+        
+                -   name: Run Backend Tests
+                run: |
+                    cd backend
+                    npm test
+                env:
+                    JWT_SECRET: "test_secret_value"
+                    LLM_API_KEY: "test_api_key_value"
+                    CLIENT_SERVICE_URL: "http://localhost:10000"
+                    NODE_ENV: "test"
+                
+                -   name: Deploy Backend to Render
+                    if: success()
+                    run: curl -X POST ${{secrets.RENDER_DEPLOY_HOOK_BACKEND}}
+
+
+        
