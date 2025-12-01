@@ -8,7 +8,7 @@ on:
 jobs:
     #Test Frontend
     frontend-tests:
-        runs-on: windows-latest  
+        runs-on: ubuntu-latest  
         steps:
         -   name: Checkout Code
             uses: actions/checkout@v3
@@ -31,7 +31,7 @@ jobs:
     #Test Backend
     backend-cicd:
         #needs: frontend-tests
-        runs-on: windows-latest  
+        runs-on: ubuntu-latest  
         steps:
         -   name: Checkout Code
             uses: actions/checkout@v3
