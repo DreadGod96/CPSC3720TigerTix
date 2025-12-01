@@ -62,6 +62,9 @@ describe('VoiceInput', () => {
     test('displays transcript and calls onSpeechResult when recognition has a result', () => {
         render(<VoiceInput onSpeechResult={mockOnSpeechResult} />);
 
+        const micButton = screen.getByRole('button', { name: /start voice command/i });
+        fireEvent.click(micButton);
+        
         expect(recognitionInstance).toBeDefined();
         expect(recognitionInstance.onresult).toBeInstanceOf(Function);
 
