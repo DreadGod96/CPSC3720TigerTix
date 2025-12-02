@@ -2,9 +2,6 @@ import "./VoiceInput.css";
 import React, { useState, useEffect, useRef } from 'react';
 import { FaMicrophone } from 'react-icons/fa';
 
-// Ensure browser compatibility
-const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-
 const playBeep = () => {
     if (typeof window === 'undefined' || !(window.AudioContext || window.webkitAudioContext)) {
         console.warn("AudioContext not supported.");
@@ -33,6 +30,9 @@ const VoiceInput = ({ onSpeechResult }) => {
     }, [onSpeechResult]);
 
     useEffect(() => {
+        // Ensure browser compatibility
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
         if (!SpeechRecognition) {
             setError("Web Speech API is not supported by this browser.");
             return;

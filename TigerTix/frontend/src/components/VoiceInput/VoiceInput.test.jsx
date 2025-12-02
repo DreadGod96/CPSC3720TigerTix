@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, fireEvent, act, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import VoiceInput from './VoiceInput.jsx';
 
@@ -45,10 +45,21 @@ describe('VoiceInput', () => {
         mockSpeechRecognition.mockClear();
         mockOnSpeechResult.mockClear();
         mockRecognitionInstance = null;
+        global.window.SpeechRecognition = mockSpeechRecognition;
+        global.window.webkitSpeechRecognition = mockSpeechRecognition;
     });
 
     test('renders the microphone button', () => {
         render(<VoiceInput onSpeechResult={mockOnSpeechResult} />);
         expect(screen.getByRole('button', { name: /start voice command/i })).toBeInTheDocument();
+    });
+    
+    test('shows an error message if Speech Recognition is not supported', () => {
+        // Temporarily remove the API for this test
+        delete global.window.SpeechRecognition;
+        delete global.window.webkitSpeechRecognition;
+        
+        render(<VoiceInput onSpeechResult={mockOnSpeechResult} />);
+        expect(screen.getByText(/web speech api is not supported by this browser/i)).toBeInTheDocument();
     });
 });
