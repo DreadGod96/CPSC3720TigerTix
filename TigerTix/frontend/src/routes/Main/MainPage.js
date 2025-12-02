@@ -53,7 +53,7 @@ export default function MainPage({ onLogout, token, credentials }) {
     const buyTicket = async (eventName, eventID, ticket_count = 1) => {
         try {
             const CLIENT_URL = process.env.REACT_APP_CLIENT_API_URL;
-            const response = await fetch(`${CLIENT_URL}api/events/${eventID}/purchase`, {
+            const response = await fetch(`${CLIENT_URL}/api/events/${eventID}/purchase`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
