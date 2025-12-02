@@ -70,7 +70,11 @@ const ChatBox = ({ messages, isLoading, onSendMessage }) => {
                 <div ref={messagesEndRef} />
             </div>
             <div className="chatbox-input">
-                <VoiceInput onSpeechResult={setInputValue} />
+                <VoiceInput 
+                    onSpeechResult={setInputValue}
+                    aria-label="Voice Input"
+                    title="Voice Input"
+                />
                 <input
                     type="text"
                     value={inputValue}
