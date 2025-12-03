@@ -7,7 +7,8 @@
   "scripts": {
     "test": "cross-env NODE_ENV=test LLM_API_KEY=DUMMY_KEY JWT_SECRET=TEST_SECRET node --experimental-vm-modules node_modules/jest/bin/jest.js --runInBand --forceExit",
     "make-db": "sqlite3 shared-db/database.sqlite < shared-db/init.sql",
-    "start": "node server.js"
+    "seed": "node seed.js",
+    "start": "node seed.js && node server.js"
   },
   "keywords": [],
   "author": "",
